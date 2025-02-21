@@ -11,13 +11,14 @@ enum ActionType {
     MOVE,
     ROTATE,
     SCALE,
+    QUIT,
 };
 
 struct Action {
     ActionType type;
-    FilesPath path;
 
     union {
+        FilesPath path;
         View view;
         Move move;
         Rotate rotate;

@@ -1,6 +1,5 @@
-#include <iostream>
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
 
 #include "logic/figure/vertices.hpp"
 
@@ -10,68 +9,84 @@ double to_radians(const double angle) {
 
 void init_vertices(Vertices &vertices) {
     vertices.array = nullptr;
+    vertices.size = 0;
 }
 
 static Vertex *allocate_vertices(const size_t size) {
     if (size == 0)
         return nullptr;
 
-    const auto vertices = static_cast<Vertex *>(malloc(size * sizeof(Vertex)));
-    if (!vertices)
-        return nullptr;
-
-    return vertices;
+    return static_cast<Vertex *>(malloc(size * sizeof(Vertex)));
 }
 
-void free_vertices(Vertex *vertices) {
-    free(vertices);
+void free_vertices(Vertices &vertices) {
+    free(vertices.array);
 }
 
 int is_init_vertices_array(const Vertices &vertices) {
     return vertices.array != nullptr;
 }
 
-ErrorFigure upload_vertices(const char *filepath, Vertices &vertices) {
+bool read_vertex(Vertex &vertex, FILE *file) {
+    return fscanf(file, "%lf%lf%lf", &vertex.x, &vertex.y, &vertex.z) == 3 || feof(file);
+}
+
+ErrorFigure read_vertices_from_file(Vertices &vertices, FILE *file, const int count) {
+    if (!file)
+        return ARGS_ERROR;
+
+    ErrorFigure error = OK;
+
+    vertices.array = allocate_vertices(count);
+    if (!vertices.array) {
+        error = MEMORY_ERROR;
+    } else {
+        for (size_t i = 0; i < static_cast<size_t>(count); i++) {
+            if (!read_vertex(vertices.array[i], file)) {
+                free_vertices(vertices);
+                error = READ_FILE_ERROR;
+                break;
+            }
+        }
+
+        if (!error)
+            vertices.size = count;
+    }
+
+    return error;
+}
+
+ErrorFigure process_file(Vertices &vertices, FILE *file) {
+    if (!file)
+        return ARGS_ERROR;
+
+    ErrorFigure error = OK;
+    int count = count_lines(file, error);
+    if (!error) {
+        if (count < 0)
+            error = READ_FILE_ERROR;
+        else
+            error = read_vertices_from_file(vertices, file, count);
+    }
+
+    return error;
+}
+
+ErrorFigure upload_vertices(Vertices &vertices, const char *filepath) {
     if (!filepath)
         return ARGS_ERROR;
 
-    FILE *file = fopen(filepath, "r");
-    if (!file)
-        return OPEN_FILE_ERROR;
-
     ErrorFigure error = OK;
-    const int n = count_lines(file, error);
-    if (error) {
-        fclose(file);
-        return error;
+    FILE *file = fopen(filepath, "r");
+    if (!file) {
+        error = OPEN_FILE_ERROR;
+    } else {
+        error = process_file(vertices, file);
     }
-    if (n < 0) {
-        fclose(file);
-        return READ_FILE_ERROR;
-    }
-
-    vertices.array = allocate_vertices(n);
-    if (!vertices.array) {
-        fclose(file);
-        return MEMORY_ERROR;
-    }
-
-    size_t i = 0;
-    while (i != static_cast<size_t>(n)) {
-        if (fscanf(file, "%lf%lf%lf", &vertices.array[i].x, &vertices.array[i].y, &vertices.array[i].z) != 3 && !
-            feof(file)) {
-            free_vertices(vertices.array);
-            fclose(file);
-            return READ_FILE_ERROR;
-        }
-        i++;
-    }
-
-    vertices.size = i;
 
     fclose(file);
 
-    return OK;
+    return error;
 }
 
 void move_vertex(Vertex &vertex, const Move &move_data) {
@@ -80,7 +95,7 @@ void move_vertex(Vertex &vertex, const Move &move_data) {
     vertex.z += move_data.dz;
 }
 
-ErrorFigure move_all_vertices(const Vertices &vertices, const Move &move_data) {
+ErrorFigure move_all_vertices(Vertices &vertices, const Move &move_data) {
     if (!vertices.array || !vertices.size)
         return ARGS_ERROR;
 
@@ -123,7 +138,7 @@ void rotate_vertex(Vertex &vertex, const Rotate &rotate_data) {
     rotate_zp(vertex, rotate_data);
 }
 
-ErrorFigure rotate_all_vertices(const Vertices &vertices, const Rotate &rotate_data) {
+ErrorFigure rotate_all_vertices(Vertices &vertices, const Rotate &rotate_data) {
     if (!vertices.array || !vertices.size)
         return ARGS_ERROR;
 
@@ -139,7 +154,7 @@ void scale_vertex(Vertex &vertex, const Scale &scale_data) {
     vertex.z = scale_data.z + (vertex.z - scale_data.z) * scale_data.k;
 }
 
-ErrorFigure scale_all_vertices(const Vertices &vertices, const Scale &scale_data) {
+ErrorFigure scale_all_vertices(Vertices &vertices, const Scale &scale_data) {
     if (!vertices.array || !vertices.size)
         return ARGS_ERROR;
 

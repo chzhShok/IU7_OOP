@@ -39,14 +39,16 @@ struct Vertices {
 
 void init_vertices(Vertices &vertices);
 
+void free_vertices(Vertices &vertices);
+
 int is_init_vertices_array(const Vertices &vertices);
 
-ErrorFigure upload_vertices(const char *filepath, Vertices &vertices);
+ErrorFigure upload_vertices(Vertices &vertices, const char *filepath);
 
-ErrorFigure move_all_vertices(const Vertices &vertices, const Move &move_data);
+ErrorFigure move_all_vertices(Vertices &vertices, const Move &move_data);
 
-ErrorFigure rotate_all_vertices(const Vertices &vertices, const Rotate &rotate_data);
+ErrorFigure rotate_all_vertices(Vertices &vertices, const Rotate &rotate_data);
 
-ErrorFigure scale_all_vertices(const Vertices &vertices, const Scale &scale_data);
+ErrorFigure scale_all_vertices(Vertices &vertices, const Scale &scale_data);
 
 #endif//VERTICES_HPP

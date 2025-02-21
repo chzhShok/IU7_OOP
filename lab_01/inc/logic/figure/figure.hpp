@@ -25,16 +25,18 @@ struct Figure {
     Edges edges;
 };
 
-ErrorFigure upload_figure(const FilesPath &path, Figure &figure);
+ErrorFigure upload_figure(Figure &figure, const FilesPath &path);
 
 Figure &init_figure();
 
+void free_figure(Figure &figure);
+
 ErrorFigure draw_figure(const View &view, const Figure &figure);
 
-ErrorFigure move_figure(const Move &move_data, const Figure &figure);
+ErrorFigure move_figure(Figure &figure, const Move &move_data);
 
-ErrorFigure rotate_figure(const Rotate &rotate_data, const Figure &figure);
+ErrorFigure rotate_figure(Figure &figure, const Rotate &rotate_data);
 
-ErrorFigure scale_figure(const Scale &scale_data, const Figure &figure);
+ErrorFigure scale_figure(Figure &figure, const Scale &scale_data);
 
 #endif//FIGURE_HPP

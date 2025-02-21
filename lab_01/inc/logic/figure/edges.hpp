@@ -18,6 +18,8 @@ struct Edges {
 
 void init_edges(Edges &edges);
 
-ErrorFigure upload_edges(const char *filepath, Edges &edges);
+void free_edges(Edges &edges);
+
+ErrorFigure upload_edges(Edges &edges, const char *filepath, const Vertices &vertices);
 
 #endif//EDGES_HPP

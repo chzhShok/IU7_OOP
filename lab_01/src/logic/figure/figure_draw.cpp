@@ -38,7 +38,5 @@ ErrorFigure draw_figure(const View &view, const Figure &figure) {
         return ARGS_ERROR;
     view.scene->clear();
 
-    const ErrorFigure error = draw_lines(view, figure.vertices, figure.edges);
-
-    return error;
+    return draw_lines(view, figure.vertices, figure.edges);
 }
