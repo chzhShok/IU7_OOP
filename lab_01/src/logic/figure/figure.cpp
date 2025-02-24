@@ -18,9 +18,15 @@ ErrorFigure upload_figure(Figure &figure, const FilesPath &path) {
     if (!path.path_edges || !path.path_vertices)
         return ARGS_ERROR;
 
-    ErrorFigure error = upload_vertices(figure.vertices, path.path_vertices);
+    Figure new_figure;
+    init_vertices(new_figure.vertices);
+    init_edges(new_figure.edges);
+
+    ErrorFigure error = upload_vertices(new_figure.vertices, path.path_vertices);
     if (error_is_ok(error)) {
-        error = upload_edges(figure.edges, path.path_edges, figure.vertices);
+        error = upload_edges(new_figure.edges, path.path_edges, new_figure.vertices);
+        if (error_is_ok(error))
+            figure = new_figure;
     }
 
     return error;
