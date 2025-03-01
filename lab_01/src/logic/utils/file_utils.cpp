@@ -19,7 +19,9 @@ ErrorFigure count_lines(size_t &count, FILE *file) {
     }
 
     if (error_is_ok(error))
-        count = n;
+        count = n - 1;
+
+    rewind(file);
 
     return error;
 }

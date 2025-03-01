@@ -8,7 +8,7 @@ static double to_radians(const double angle) {
 }
 
 Vertices init_vertices() {
-    return {NULL, 0};
+    return {nullptr, 0};
 }
 
 static ErrorFigure allocate_vertices(Vertex *&vertex, const size_t size) {
@@ -111,25 +111,31 @@ ErrorFigure move_all_vertices(Vertices &vertices, const Move &move_data) {
 static void rotate_xp(Vertex &vertex, const Rotate &rotate_data) {
     const double cos_x = cos(to_radians(rotate_data.dx));
     const double sin_x = sin(to_radians(rotate_data.dx));
+    const double y = vertex.y;
+    const double z = vertex.z;
 
-    vertex.y = (vertex.y - rotate_data.y) * cos_x + (vertex.z - rotate_data.z) * sin_x + rotate_data.y;
-    vertex.z = (vertex.y - rotate_data.y) * sin_x + (vertex.z - rotate_data.z) * cos_x + rotate_data.z;
+    vertex.y = (y - rotate_data.y) * cos_x + (z - rotate_data.z) * sin_x + rotate_data.y;
+    vertex.z = -(y - rotate_data.y) * sin_x + (z - rotate_data.z) * cos_x + rotate_data.z;
 }
 
 static void rotate_yp(Vertex &vertex, const Rotate &rotate_data) {
     const double cos_y = cos(to_radians(rotate_data.dy));
     const double sin_y = sin(to_radians(rotate_data.dy));
+    const double x = vertex.x;
+    const double z = vertex.z;
 
-    vertex.x = (vertex.x - rotate_data.x) * cos_y + (vertex.z - rotate_data.z) * sin_y + rotate_data.x;
-    vertex.z = -(vertex.x - rotate_data.x) * sin_y + (vertex.z - rotate_data.z) * cos_y + rotate_data.z;
+    vertex.x = (x - rotate_data.x) * cos_y + (z - rotate_data.z) * sin_y + rotate_data.x;
+    vertex.z = -(x - rotate_data.x) * sin_y + (z - rotate_data.z) * cos_y + rotate_data.z;
 }
 
 static void rotate_zp(Vertex &vertex, const Rotate &rotate_data) {
     const double cos_z = cos(to_radians(rotate_data.dz));
     const double sin_z = sin(to_radians(rotate_data.dz));
+    const double x = vertex.x;
+    const double y = vertex.y;
 
-    vertex.x = (vertex.x - rotate_data.x) * cos_z + (vertex.y - rotate_data.y) * sin_z + rotate_data.x;
-    vertex.y = (vertex.x - rotate_data.x) * sin_z + (vertex.y - rotate_data.y) * cos_z + rotate_data.y;
+    vertex.x = (x - rotate_data.x) * cos_z + (y - rotate_data.y) * sin_z + rotate_data.x;
+    vertex.y = -(x - rotate_data.x) * sin_z + (y - rotate_data.y) * cos_z + rotate_data.y;
 }
 
 static void rotate_vertex(Vertex &vertex, const Rotate &rotate_data) {

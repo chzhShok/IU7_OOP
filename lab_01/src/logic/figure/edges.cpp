@@ -4,7 +4,7 @@
 #include "logic/figure/edges.hpp"
 
 Edges init_edges() {
-    return {NULL, 0};
+    return {nullptr, 0};
 }
 
 static ErrorFigure allocate_edges(Edge *&edge, const size_t size) {
@@ -25,12 +25,12 @@ void free_edges(Edges &edges) {
     if (edges.array)
         free(edges.array);
 
-    edges.array = NULL;
+    edges.array = nullptr;
     edges.size = 0;
 }
 
 static bool read_edge(Edge &edge, FILE *file) {
-    return fscanf(file, "%d%d", &edge.vertex1, &edge.vertex2) != 2 || feof(file);
+    return fscanf(file, "%d%d", &edge.vertex1, &edge.vertex2) == 2 || feof(file);
 }
 
 static ErrorFigure read_edges_from_file(Edge *&array, FILE *file, const size_t count) {

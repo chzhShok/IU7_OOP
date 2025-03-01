@@ -1,7 +1,11 @@
 #include "logic/figure/figure.hpp"
 
 Figure init_figure() {
-    return Figure{Vertices{nullptr, 0}, Edges{nullptr, 0}};
+    Figure figure;
+    figure.vertices = init_vertices();
+    figure.edges = init_edges();
+
+    return figure;
 }
 
 void free_figure(Figure &figure) {
