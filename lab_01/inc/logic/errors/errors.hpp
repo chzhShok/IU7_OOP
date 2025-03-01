@@ -8,10 +8,13 @@ enum ErrorFigure {
     READ_FILE_ERROR,
     MEMORY_ERROR,
     DEBUG,
+    INVALID_EDGES,
 };
 
 char *manage_error(const ErrorFigure error);
 
 int error_is_ok(const ErrorFigure error);
+
+ErrorFigure init_error();
 
 #endif//ERRORS_HPP
