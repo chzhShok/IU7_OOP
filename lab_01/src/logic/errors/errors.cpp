@@ -4,6 +4,10 @@ int error_is_ok(const ErrorFigure error) {
     return error == OK;
 }
 
+ErrorFigure init_error() {
+    return OK;
+}
+
 char *manage_error(const ErrorFigure error) {
     char *message = "";
 

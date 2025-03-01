@@ -3,7 +3,7 @@
 ErrorFigure manage_action(const Action &action) {
     static Figure figure = init_figure();
 
-    ErrorFigure error = OK;
+    ErrorFigure error = init_error();
     switch (action.type) {
         case UPLOAD:
             error = upload_figure(figure, action.path);

@@ -27,7 +27,7 @@ struct Figure {
 
 ErrorFigure upload_figure(Figure &figure, const FilesPath &path);
 
-Figure &init_figure();
+Figure init_figure();
 
 void free_figure(Figure &figure);
 

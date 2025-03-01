@@ -37,7 +37,7 @@ struct Vertices {
     size_t size;
 };
 
-void init_vertices(Vertices &vertices);
+Vertices init_vertices();
 
 void free_vertices(Vertices &vertices);
 

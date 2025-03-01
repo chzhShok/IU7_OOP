@@ -1,26 +1,27 @@
-#include <QString>
 #include <QFile>
+#include <QString>
 
 #include <cstdio>
 
 #include "logic/utils/file_utils.hpp"
 
-int count_lines(FILE *file, ErrorFigure &error) {
-    if (!file) {
-        error = ARGS_ERROR;
-        return -1;
+ErrorFigure count_lines(size_t &count, FILE *file) {
+    if (!file)
+        return ARGS_ERROR;
+
+    ErrorFigure error = init_error();
+    size_t n = 0;
+    while (!feof(file)) {
+        if (fscanf(file, "%*[^\n]%*c") == -1 && !feof(file))
+            error = MEMORY_ERROR;
+        else
+            n++;
     }
 
-    size_t count = 0;
-    char buffer[1024];
+    if (error_is_ok(error))
+        count = n;
 
-    while (fgets(buffer, sizeof(buffer), file))
-        ++count;
-
-    rewind(file);
-    error = OK;
-
-    return static_cast<int>(count);
+    return error;
 }
 
 FilesPath dir_path_to_files_paths(const QString &dir_path) {

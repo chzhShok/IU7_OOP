@@ -1,12 +1,7 @@
 #include "logic/figure/figure.hpp"
 
-Figure &init_figure() {
-    static Figure figure;
-
-    init_vertices(figure.vertices);
-    init_edges(figure.edges);
-
-    return figure;
+Figure init_figure() {
+    return Figure{Vertices{nullptr, 0}, Edges{nullptr, 0}};
 }
 
 void free_figure(Figure &figure) {
@@ -14,19 +9,55 @@ void free_figure(Figure &figure) {
     free_edges(figure.edges);
 }
 
-ErrorFigure upload_figure(Figure &figure, const FilesPath &path) {
-    if (!path.path_edges || !path.path_vertices)
-        return ARGS_ERROR;
+static ErrorFigure edge_is_valid(const Edge &edge, const Vertices &vertices) {
+    ErrorFigure error = init_error();
 
-    Figure new_figure;
-    init_vertices(new_figure.vertices);
-    init_edges(new_figure.edges);
+    if (edge.vertex1 > vertices.size || edge.vertex1 <= 0 || edge.vertex2 > vertices.size || edge.vertex2 <= 0)
+        error = INVALID_EDGES;
 
-    ErrorFigure error = upload_vertices(new_figure.vertices, path.path_vertices);
+    return error;
+}
+
+static ErrorFigure figure_is_valid(const Vertices &vertices, const Edges &edges) {
+    ErrorFigure error = init_error();
+
+    for (size_t i = 0; error_is_ok(error) && i < edges.size; i++)
+        error = edge_is_valid(edges.array[i], vertices);
+
+    return error;
+}
+
+ErrorFigure create_figure_from_file(Figure &figure, const FilesPath &path) {
+    Vertices vertices = init_vertices();
+
+    ErrorFigure error = upload_vertices(vertices, path.path_vertices);
+
     if (error_is_ok(error)) {
-        error = upload_edges(new_figure.edges, path.path_edges, new_figure.vertices);
-        if (error_is_ok(error))
-            figure = new_figure;
+        Edges edges = init_edges();
+        error = upload_edges(edges, path.path_edges);
+        if (!error_is_ok(error)) {
+            free_vertices(vertices);
+        } else {
+            error = figure_is_valid(vertices, edges);
+            if (!error_is_ok(error))
+                free_figure(figure);
+            else {
+                figure.edges = edges;
+                figure.vertices = vertices;
+            }
+        }
+    }
+
+    return error;
+}
+
+ErrorFigure upload_figure(Figure &carcass, const FilesPath &path) {
+    Figure new_figure;
+    ErrorFigure error = create_figure_from_file(new_figure, path);
+
+    if (error_is_ok(error)) {
+        free_figure(carcass);
+        carcass = new_figure;
     }
 
     return error;

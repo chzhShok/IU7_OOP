@@ -12,7 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
-    // Холст
     QGraphicsScene *scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -72,9 +71,9 @@ void MainWindow::on_move_submit_clicked() {
     Action action;
     action.type = MOVE;
     action.move = {
-            .dx = ui->dx_move->value(),
-            .dy = ui->dy_move->value(),
-            .dz = ui->dz_move->value(),
+        .dx = ui->dx_move->value(),
+        .dy = ui->dy_move->value(),
+        .dz = ui->dz_move->value(),
     };
 
     ErrorFigure error = manage_action(action);
@@ -88,12 +87,12 @@ void MainWindow::on_rotate_submit_clicked() {
     Action action;
     action.type = ROTATE;
     action.rotate = {
-            .x = ui->x_rotate->value(),
-            .y = ui->y_rotate->value(),
-            .z = ui->z_rotate->value(),
-            .dx = ui->dx_rotate->value(),
-            .dy = ui->dy_rotate->value(),
-            .dz = ui->dz_rotate->value(),
+        .x = ui->x_rotate->value(),
+        .y = ui->y_rotate->value(),
+        .z = ui->z_rotate->value(),
+        .dx = ui->dx_rotate->value(),
+        .dy = ui->dy_rotate->value(),
+        .dz = ui->dz_rotate->value(),
     };
 
     ErrorFigure error = manage_action(action);
@@ -107,10 +106,10 @@ void MainWindow::on_scale_submit_clicked() {
     Action action;
     action.type = SCALE;
     action.scale = {
-            .x = ui->x_scale->value(),
-            .y = ui->y_scale->value(),
-            .z = ui->z_scale->value(),
-            .k = ui->k_scale->value(),
+        .x = ui->x_scale->value(),
+        .y = ui->y_scale->value(),
+        .z = ui->z_scale->value(),
+        .k = ui->k_scale->value(),
     };
 
     ErrorFigure error = manage_action(action);
@@ -124,9 +123,9 @@ void MainWindow::draw() {
     Action action;
     action.type = DRAW;
     action.view = {
-            .scene = ui->graphicsView->scene(),
-            .width = ui->graphicsView->scene()->width(),
-            .height = ui->graphicsView->scene()->height(),
+        .scene = ui->graphicsView->scene(),
+        .width = ui->graphicsView->scene()->width(),
+        .height = ui->graphicsView->scene()->height(),
     };
 
     ErrorFigure error = manage_action(action);

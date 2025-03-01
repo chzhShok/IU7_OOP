@@ -14,7 +14,7 @@ struct FilesPath {
     char *path_edges;
 };
 
-int count_lines(FILE *file, ErrorFigure &error);
+ErrorFigure count_lines(size_t &count, FILE *file);
 
 FilesPath dir_path_to_files_paths(const QString &dir_path);
 
