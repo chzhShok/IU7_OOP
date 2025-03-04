@@ -43,9 +43,10 @@ ErrorFigure create_figure_from_file(Figure &figure, const FilesPath &path) {
             free_vertices(vertices);
         } else {
             error = figure_is_valid(vertices, edges);
-            if (!error_is_ok(error))
-                free_figure(figure);
-            else {
+            if (!error_is_ok(error)) {
+                free_vertices(vertices);
+                free_edges(edges);
+            } else {
                 figure.edges = edges;
                 figure.vertices = vertices;
             }
