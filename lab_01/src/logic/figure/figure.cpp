@@ -13,10 +13,10 @@ void free_figure(Figure &figure) {
     free_edges(figure.edges);
 }
 
-static ErrorFigure edge_is_valid(const Edge &edge, const Vertices &vertices) {
+static ErrorFigure edge_is_valid(const Edge &edge, size_t size) {
     ErrorFigure error = init_error();
 
-    if (edge.vertex1 > vertices.size || edge.vertex1 <= 0 || edge.vertex2 > vertices.size || edge.vertex2 <= 0)
+    if (edge.vertex1 > size || edge.vertex1 <= 0 || edge.vertex2 > size || edge.vertex2 <= 0)
         error = INVALID_EDGES;
 
     return error;
@@ -26,7 +26,7 @@ static ErrorFigure figure_is_valid(const Vertices &vertices, const Edges &edges)
     ErrorFigure error = init_error();
 
     for (size_t i = 0; error_is_ok(error) && i < edges.size; i++)
-        error = edge_is_valid(edges.array[i], vertices);
+        error = edge_is_valid(edges.array[i], vertices.size);
 
     return error;
 }
@@ -55,13 +55,13 @@ ErrorFigure create_figure_from_file(Figure &figure, const FilesPath &path) {
     return error;
 }
 
-ErrorFigure upload_figure(Figure &carcass, const FilesPath &path) {
+ErrorFigure upload_figure(Figure &figure, const FilesPath &path) {
     Figure new_figure;
     ErrorFigure error = create_figure_from_file(new_figure, path);
 
     if (error_is_ok(error)) {
-        free_figure(carcass);
-        carcass = new_figure;
+        free_figure(figure);
+        figure = new_figure;
     }
 
     return error;

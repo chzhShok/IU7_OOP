@@ -50,6 +50,7 @@ static ErrorFigure read_vertices_from_file(Vertex *&array, FILE *file, const siz
         if (!read_vertex(array[i], file))
             error = READ_FILE_ERROR;
     }
+    
     return error;
 }
 
