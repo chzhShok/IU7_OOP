@@ -21,5 +21,6 @@ Edges init_edges();
 void free_edges(Edges &edges);
 
 ErrorFigure upload_edges(Edges &edges, const char *filepath);
+ErrorFigure edge_is_valid(const Edge &edge, size_t size);
 
 #endif//EDGES_HPP

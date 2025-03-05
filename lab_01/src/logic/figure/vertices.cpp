@@ -11,6 +11,10 @@ Vertices init_vertices() {
     return {nullptr, 0};
 }
 
+Vertex init_vertex() {
+    return {0, 0, 0};
+}
+
 static ErrorFigure allocate_vertices(Vertex *&vertex, const size_t size) {
     if (size == 0)
         return ARGS_ERROR;
@@ -50,7 +54,7 @@ static ErrorFigure read_vertices_from_file(Vertex *&array, FILE *file, const siz
         if (!read_vertex(array[i], file))
             error = READ_FILE_ERROR;
     }
-    
+
     return error;
 }
 
@@ -58,18 +62,13 @@ static ErrorFigure process_vertices_file(Vertices &vertices, FILE *file) {
     if (!file)
         return ARGS_ERROR;
 
-    size_t count = 0;
-    ErrorFigure error = count_lines(count, file);
-    if (error_is_ok(error) && count > 0) {
-        Vertex *temp = nullptr;
-        error = allocate_vertices(temp, count);
+    ErrorFigure error = count_lines(vertices.size, file);
+    if (error_is_ok(error) && vertices.size > 0) {
+        error = allocate_vertices(vertices.array, vertices.size);
         if (error_is_ok(error)) {
-            error = read_vertices_from_file(temp, file, count);
+            error = read_vertices_from_file(vertices.array, file, vertices.size);
             if (!error_is_ok(error)) {
-                free(temp);
-            } else {
-                vertices.array = temp;
-                vertices.size = count;
+                free(vertices.array);
             }
         }
     }
@@ -81,6 +80,7 @@ ErrorFigure upload_vertices(Vertices &vertices, const char *filepath) {
     if (!filepath)
         return ARGS_ERROR;
 
+    vertices = init_vertices();
     ErrorFigure error = init_error();
     FILE *file = fopen(filepath, "r");
     if (!file) {
@@ -115,8 +115,8 @@ static void rotate_xp(Vertex &vertex, const Rotate &rotate_data) {
     const double y = vertex.y;
     const double z = vertex.z;
 
-    vertex.y = (y - rotate_data.y) * cos_x + (z - rotate_data.z) * sin_x + rotate_data.y;
-    vertex.z = -(y - rotate_data.y) * sin_x + (z - rotate_data.z) * cos_x + rotate_data.z;
+    vertex.y = y * cos_x + z * sin_x;
+    vertex.z = -y * sin_x + z * cos_x;
 }
 
 static void rotate_yp(Vertex &vertex, const Rotate &rotate_data) {
@@ -125,8 +125,8 @@ static void rotate_yp(Vertex &vertex, const Rotate &rotate_data) {
     const double x = vertex.x;
     const double z = vertex.z;
 
-    vertex.x = (x - rotate_data.x) * cos_y + (z - rotate_data.z) * sin_y + rotate_data.x;
-    vertex.z = -(x - rotate_data.x) * sin_y + (z - rotate_data.z) * cos_y + rotate_data.z;
+    vertex.x = x * cos_y + z * sin_y;
+    vertex.z = -x * sin_y + z * cos_y;
 }
 
 static void rotate_zp(Vertex &vertex, const Rotate &rotate_data) {
@@ -135,14 +135,30 @@ static void rotate_zp(Vertex &vertex, const Rotate &rotate_data) {
     const double x = vertex.x;
     const double y = vertex.y;
 
-    vertex.x = (x - rotate_data.x) * cos_z + (y - rotate_data.y) * sin_z + rotate_data.x;
-    vertex.y = -(x - rotate_data.x) * sin_z + (y - rotate_data.y) * cos_z + rotate_data.y;
+    vertex.x = x * cos_z + y * sin_z;
+    vertex.y = -x * sin_z + y * cos_z;
+}
+
+static void move_to_center(Vertex &vertex, const Rotate &rotate_data) {
+    vertex.x -= rotate_data.x;
+    vertex.y -= rotate_data.y;
+    vertex.z -= rotate_data.z;
+}
+
+static void move_from_center(Vertex &vertex, const Rotate &rotate_data) {
+    vertex.x += rotate_data.x;
+    vertex.y += rotate_data.y;
+    vertex.z += rotate_data.z;
 }
 
 static void rotate_vertex(Vertex &vertex, const Rotate &rotate_data) {
+    move_to_center(vertex, rotate_data);
+
     rotate_xp(vertex, rotate_data);
     rotate_yp(vertex, rotate_data);
     rotate_zp(vertex, rotate_data);
+
+    move_from_center(vertex, rotate_data);
 }
 
 ErrorFigure rotate_all_vertices(Vertices &vertices, const Rotate &rotate_data) {

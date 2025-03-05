@@ -13,16 +13,10 @@ void free_figure(Figure &figure) {
     free_edges(figure.edges);
 }
 
-static ErrorFigure edge_is_valid(const Edge &edge, size_t size) {
-    ErrorFigure error = init_error();
-
-    if (edge.vertex1 > size || edge.vertex1 <= 0 || edge.vertex2 > size || edge.vertex2 <= 0)
-        error = INVALID_EDGES;
-
-    return error;
-}
-
 static ErrorFigure figure_is_valid(const Vertices &vertices, const Edges &edges) {
+    if (!vertices.array || !vertices.size)
+        return ARGS_ERROR;
+
     ErrorFigure error = init_error();
 
     for (size_t i = 0; error_is_ok(error) && i < edges.size; i++)
@@ -32,24 +26,12 @@ static ErrorFigure figure_is_valid(const Vertices &vertices, const Edges &edges)
 }
 
 ErrorFigure create_figure_from_file(Figure &figure, const FilesPath &path) {
-    Vertices vertices = init_vertices();
-
-    ErrorFigure error = upload_vertices(vertices, path.path_vertices);
+    ErrorFigure error = upload_vertices(figure.vertices, path.path_vertices);
 
     if (error_is_ok(error)) {
-        Edges edges = init_edges();
-        error = upload_edges(edges, path.path_edges);
+        error = upload_edges(figure.edges, path.path_edges);
         if (!error_is_ok(error)) {
-            free_vertices(vertices);
-        } else {
-            error = figure_is_valid(vertices, edges);
-            if (!error_is_ok(error)) {
-                free_vertices(vertices);
-                free_edges(edges);
-            } else {
-                figure.edges = edges;
-                figure.vertices = vertices;
-            }
+            free_vertices(figure.vertices);
         }
     }
 
@@ -61,8 +43,13 @@ ErrorFigure upload_figure(Figure &figure, const FilesPath &path) {
     ErrorFigure error = create_figure_from_file(new_figure, path);
 
     if (error_is_ok(error)) {
-        free_figure(figure);
-        figure = new_figure;
+        error = figure_is_valid(new_figure.vertices, new_figure.edges);
+        if (error_is_ok(error)) {
+            free_figure(figure);
+            figure = new_figure;
+        } else {
+            free_figure(new_figure);
+        }
     }
 
     return error;

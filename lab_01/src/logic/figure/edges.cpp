@@ -29,6 +29,15 @@ void free_edges(Edges &edges) {
     edges.size = 0;
 }
 
+ErrorFigure edge_is_valid(const Edge &edge, size_t size) {
+    ErrorFigure error = init_error();
+
+    if (edge.vertex1 > size || edge.vertex1 <= 0 || edge.vertex2 > size || edge.vertex2 <= 0)
+        error = INVALID_EDGES;
+
+    return error;
+}
+
 static bool read_edge(Edge &edge, FILE *file) {
     return fscanf(file, "%d%d", &edge.vertex1, &edge.vertex2) == 2 || feof(file);
 }
@@ -42,6 +51,7 @@ static ErrorFigure read_edges_from_file(Edge *&array, FILE *file, const size_t c
         if (!read_edge(array[i], file))
             error = READ_FILE_ERROR;
     }
+
     return error;
 }
 
@@ -49,18 +59,13 @@ static ErrorFigure process_edges_file(Edges &edges, FILE *file) {
     if (!file)
         return ARGS_ERROR;
 
-    size_t count = 0;
-    ErrorFigure error = count_lines(count, file);
-    if (error_is_ok(error) && count > 0) {
-        Edge *temp = nullptr;
-        error = allocate_edges(temp, count);
+    ErrorFigure error = count_lines(edges.size, file);
+    if (error_is_ok(error) && edges.size > 0) {
+        error = allocate_edges(edges.array, edges.size);
         if (error_is_ok(error)) {
-            error = read_edges_from_file(temp, file, count);
+            error = read_edges_from_file(edges.array, file, edges.size);
             if (!error_is_ok(error)) {
-                free(temp);
-            } else {
-                edges.array = temp;
-                edges.size = count;
+                free(edges.array);
             }
         }
     }
@@ -72,6 +77,7 @@ ErrorFigure upload_edges(Edges &edges, const char *filepath) {
     if (!filepath)
         return ARGS_ERROR;
 
+    edges = init_edges();
     ErrorFigure error = init_error();
     FILE *file = fopen(filepath, "r");
     if (!file) {

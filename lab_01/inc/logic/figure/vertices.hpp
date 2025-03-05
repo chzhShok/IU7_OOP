@@ -39,6 +39,8 @@ struct Vertices {
 
 Vertices init_vertices();
 
+Vertex init_vertex();
+
 void free_vertices(Vertices &vertices);
 
 int is_init_vertices_array(const Vertices &vertices);
