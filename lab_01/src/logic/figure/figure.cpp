@@ -13,6 +13,10 @@ void free_figure(Figure &figure) {
     free_edges(figure.edges);
 }
 
+static void move_figure(Figure &dst, const Figure &src) {
+    dst = src;
+}
+
 static ErrorFigure figure_is_valid(const Vertices &vertices, const Edges &edges) {
     if (!vertices.array || !vertices.size)
         return ARGS_ERROR;
@@ -46,7 +50,7 @@ ErrorFigure upload_figure(Figure &figure, const FilesPath &path) {
         error = figure_is_valid(new_figure.vertices, new_figure.edges);
         if (error_is_ok(error)) {
             free_figure(figure);
-            figure = new_figure;
+            move_figure(figure, new_figure);
         } else {
             free_figure(new_figure);
         }

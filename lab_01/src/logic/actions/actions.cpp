@@ -9,7 +9,7 @@ ErrorFigure manage_action(const Action &action) {
             error = upload_figure(figure, action.path);
             break;
         case DRAW:
-            error = draw_figure(action.view, figure);
+            error = draw_figure((View &) action.view, figure);
             break;
         case MOVE:
             error = move_figure(figure, action.move);

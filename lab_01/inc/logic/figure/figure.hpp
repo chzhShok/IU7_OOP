@@ -31,7 +31,7 @@ Figure init_figure();
 
 void free_figure(Figure &figure);
 
-ErrorFigure draw_figure(const View &view, const Figure &figure);
+ErrorFigure draw_figure(View &view, const Figure &figure);
 
 ErrorFigure move_figure(Figure &figure, const Move &move_data);
 

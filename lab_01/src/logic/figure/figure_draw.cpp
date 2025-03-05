@@ -29,7 +29,7 @@ ErrorFigure get_points(Line &line, const View &view, const Edge &edge, const Ver
     return error;
 }
 
-ErrorFigure draw_line(const View &view, const Vertex &vertex1, const Vertex &vertex2) {
+ErrorFigure draw_line(View &view, const Vertex &vertex1, const Vertex &vertex2) {
     if (!view.scene)
         return ARGS_ERROR;
 
@@ -44,7 +44,7 @@ Line init_line() {
     return line;
 }
 
-ErrorFigure draw_lines(const View &view, const Vertices &vertices, const Edges &edges) {
+ErrorFigure draw_lines(View &view, const Vertices &vertices, const Edges &edges) {
     if (!vertices.array || !edges.array || !view.scene)
         return ARGS_ERROR;
 
@@ -63,7 +63,7 @@ void clear_scene(const View &view) {
     view.scene->clear();
 }
 
-ErrorFigure draw_figure(const View &view, const Figure &figure) {
+ErrorFigure draw_figure(View &view, const Figure &figure) {
     if (!view.scene)
         return ARGS_ERROR;
 
