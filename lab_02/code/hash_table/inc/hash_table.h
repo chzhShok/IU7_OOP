@@ -30,9 +30,9 @@ public:
     bool remove(const Key &key);
     bool contains(const Key &key) const;
     void clear();
-    void fill(Iterator<T> start, const Iterator<T> &end, const T &value);                           //TODO
-    void fill(Iterator<T> start, Iterator<T> source_start, const Iterator<T> &source_end);          //TODO
-    void fill(Iterator<T> start, ConstIterator<T> source_start, const ConstIterator<T> &source_end);//TODO
+//    void fill(Iterator<T> start, const Iterator<T> &end, const T &value);                           //TODO
+//    void fill(Iterator<T> start, Iterator<T> source_start, const Iterator<T> &source_end);          //TODO
+//    void fill(Iterator<T> start, ConstIterator<T> source_start, const ConstIterator<T> &source_end);//TODO
 
     // Рехеширование
     void rehash(size_t new_bucket_count);
@@ -80,11 +80,11 @@ private:
         std::shared_ptr<Node> next;
     };
 
-    size_t hash(const Key &key) const noexcept;
-    void checkAndRehash();
-    Node *findNode(const Key &key) const;
-    void deleteChain(Node *head);
-    size_t next_power_of_two(size_t n) noexcept;
+    size_t hash(const Key &key) const noexcept; //TODO
+    void checkAndRehash();                      //TODO
+    Node *findNode(const Key &key) const;       //TODO
+    void deleteChain(Node *head);               //TODO
+    size_t next_power_of_two(size_t n) noexcept;//TODO
 
     //TODO
     std::vector<std::shared_ptr<Node>> buckets_;
