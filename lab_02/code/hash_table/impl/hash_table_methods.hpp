@@ -97,3 +97,43 @@ void HashTable<Key, Value>::rehash(size_t new_bucket_count) {
 
     buckets_ = std::move(new_buckets);
 }
+
+template<typename Key, typename Value>
+void HashTable<Key, Value>::merge(const HashTable &other, std::function<Value(Value old_val, Value new_val)> resolveConflict) {
+    for (const auto &bucket: other.buckets_) {
+        for (const auto &[key, other_val]: bucket) {
+            if (this->contains(key)) {
+                if (resolveConflict)
+                    (*this)[key] = resolveConflict((*this)[key], other_val);
+                else
+                    (*this)[key] = other_val;
+            } else {
+                this->insert(key, other_val);
+            }
+        }
+    }
+}
+
+template<typename Key, typename Value>
+void HashTable<Key, Value>::fill(HashTableIterator<Key, Value> start, const HashTableIterator<Key, Value> &end, const Value &value) {
+    for (; start != end; ++start)
+        (*start).second = value;
+}
+
+template<typename Key, typename Value>
+void HashTable<Key, Value>::fill(HashTableIterator<Key, Value> start, HashTableIterator<Key, Value> source_start, const HashTableIterator<Key, Value> &source_end) {
+    while (source_start != source_end && start != this->end()) {
+        (*start).second = (*source_start).second;
+        ++start;
+        ++source_start;
+    }
+}
+
+template<typename Key, typename Value>
+void HashTable<Key, Value>::fill(HashTableIterator<Key, Value> start, HashTableConstIterator<Key, Value> source_start, const HashTableConstIterator<Key, Value> &source_end) {
+    while (source_start != source_end && start != this->end()) {
+        (*start).second = (*source_start).second;
+        ++start;
+        ++source_start;
+    }
+}
