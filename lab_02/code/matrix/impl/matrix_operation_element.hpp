@@ -1,7 +1,8 @@
 #pragma once
 
-template<typename T>
-Matrix<T> Matrix<T>::operator+(const T &elem) const noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> Matrix<T>::operator+(const U &elem) const noexcept {
     Matrix<T> tmp(rows, cols);
 
     for (int i = 0; i < rows; ++i)
@@ -11,8 +12,16 @@ Matrix<T> Matrix<T>::operator+(const T &elem) const noexcept {
     return tmp;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator-(const T &elem) const noexcept {
+template<typename T, typename U>
+    requires ElementArithmetic<T, U>
+Matrix<T> operator+(const U &elem, const Matrix<T> &matrix) {
+    return matrix + elem;
+}
+
+
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> Matrix<T>::operator-(const U &elem) const noexcept {
     Matrix<T> tmp(rows, cols);
 
     for (int i = 0; i < rows; ++i)
@@ -22,8 +31,15 @@ Matrix<T> Matrix<T>::operator-(const T &elem) const noexcept {
     return tmp;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator*(const T &elem) const noexcept {
+template<typename T, typename U>
+    requires ElementArithmetic<T, U>
+Matrix<T> operator-(const U &elem, const Matrix<T> &matrix) {
+    return matrix - elem;
+}
+
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> Matrix<T>::operator*(const U &elem) const noexcept {
     Matrix<T> tmp(rows, cols);
 
     for (int i = 0; i < rows; ++i)
@@ -33,8 +49,15 @@ Matrix<T> Matrix<T>::operator*(const T &elem) const noexcept {
     return tmp;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator/(const T &elem) const {
+template<typename T, typename U>
+    requires ElementArithmetic<T, U>
+Matrix<T> operator*(const U &elem, const Matrix<T> &matrix) {
+    return matrix * elem;
+}
+
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> Matrix<T>::operator/(const U &elem) const {
     if (elem == 0) {
         time_t currentTime = time(NULL);
         throw ZeroDivision(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
@@ -49,52 +72,66 @@ Matrix<T> Matrix<T>::operator/(const T &elem) const {
     return tmp;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::addElem(const T &elem) const noexcept {
+template<typename T, typename U>
+    requires ElementArithmetic<T, U>
+Matrix<T> operator/(const U &elem, const Matrix<T> &matrix) {
+    return matrix / elem;
+}
+
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> Matrix<T>::addElem(const U &elem) const noexcept {
     return operator+(elem);
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::subElem(const T &elem) const noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> Matrix<T>::subElem(const U &elem) const noexcept {
     return operator-(elem);
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::mulElem(const T &elem) const noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> Matrix<T>::mulElem(const U &elem) const noexcept {
     return operator*(elem);
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::divElem(const T &elem) const {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> Matrix<T>::divElem(const U &elem) const {
     return operator/(elem);
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator+=(const T &elem) noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator+=(const U &elem) noexcept {
     for (auto &element: *this)
         element += elem;
 
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator-=(const T &elem) noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator-=(const U &elem) noexcept {
     for (auto &element: *this)
         element -= elem;
 
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator*=(const T &elem) noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator*=(const U &elem) noexcept {
     for (auto &element: *this)
         element *= elem;
 
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator/=(const T &elem) {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator/=(const U &elem) {
     if (elem == 0) {
         time_t currentTime = time(NULL);
         throw ZeroDivision(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
@@ -107,22 +144,26 @@ Matrix<T> &Matrix<T>::operator/=(const T &elem) {
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::addEqElem(const T &elem) noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> &Matrix<T>::addEqElem(const U &elem) noexcept {
     return operator+=(elem);
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::subEqElem(const T &elem) noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> &Matrix<T>::subEqElem(const U &elem) noexcept {
     return operator-=(elem);
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::mulEqElem(const T &elem) noexcept {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> &Matrix<T>::mulEqElem(const U &elem) noexcept {
     return operator*=(elem);
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::divEqElem(const T &elem) {
+template<MatrixElement T>
+template<ElementArithmetic<T> U>
+Matrix<T> &Matrix<T>::divEqElem(const U &elem) {
     return operator/=(elem);
 }

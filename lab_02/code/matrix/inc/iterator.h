@@ -6,37 +6,47 @@
 #include "base_iterator.h"
 #include "exception.h"
 
-template<typename T>
+template<MatrixElement T>
 class Matrix;
 
-template<typename T>
+// random access iterator
+template<MatrixElement T>
 class Iterator : public BaseIterator {
 public:
-    Iterator() = default;
-    Iterator(const Matrix<T> &);
-    Iterator(const Iterator<T> &);
-    Iterator(const Iterator<T> &, size_t new_index);
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T *;
+    using reference = T &;
 
-    T &operator*();
-    const T &operator*() const;
-    T *operator->();
-    const T *operator->() const;
+    Iterator() = default;
+    Iterator(const Matrix<T> &matrix);
+    Iterator(const Iterator<T> &other);
+    Iterator(const Iterator<T> &other, size_t new_index);
+
+    reference operator*();
+    const reference operator*() const;
+    pointer operator->();
+    const pointer operator->() const;
+    reference operator[](int n);
+    const reference operator[](int n) const;
+
     operator bool() const;
 
-    T &value();
-    const T &value() const;
+    reference value();
+    const reference value() const;
 
-    Iterator<T> &operator=(const Iterator<T> &iterator);
+    Iterator &operator=(const Iterator<T> &iterator);
 
-    Iterator<T> &operator+=(int value);
-    Iterator<T> &operator++();  // префиксный инкремент
-    Iterator<T> operator++(int);// постфиксный инкремент
-    Iterator<T> operator+(int value) const;
+    Iterator &operator+=(int value);
+    Iterator &operator++();  // префиксный инкремент
+    Iterator operator++(int);// постфиксный инкремент
+    Iterator operator+(int value) const;
 
-    Iterator<T> &operator-=(int value);
-    Iterator<T> &operator--();  // префиксный декремент
-    Iterator<T> operator--(int);// постфиксный декремент
-    Iterator<T> operator-(int value) const;
+    Iterator &operator-=(int value);
+    Iterator &operator--();  // префиксный декремент
+    Iterator operator--(int);// постфиксный декремент
+    Iterator operator-(int value) const;
 
     bool operator<=(const Iterator<T> &iterator) const;
     bool operator<(const Iterator<T> &iterator) const;
@@ -48,13 +58,12 @@ public:
     bool isEnd() const;
     bool isValid() const;
 
-    Iterator<T> &next();
+    Iterator &next();
 
-protected:
+private:
     void check_index(int line) const;
     void check_validity(int line) const;
 
-private:
     std::weak_ptr<typename Matrix<T>::MatrixRow[]> data{};
     int index = 0;
     size_t rows = 0;

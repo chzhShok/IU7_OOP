@@ -2,7 +2,7 @@
 
 #include "exception.h"
 
-template<typename T>
+template<MatrixElement T>
 T &Matrix<T>::MatrixRow::operator[](size_t index) {
     if (index >= size || index < 0) {
         time_t currentTime = time(NULL);
@@ -12,7 +12,7 @@ T &Matrix<T>::MatrixRow::operator[](size_t index) {
     return data[index];
 }
 
-template<typename T>
+template<MatrixElement T>
 const T &Matrix<T>::MatrixRow::operator[](size_t index) const {
     if (index >= size || index < 0) {
         time_t currentTime = time(NULL);
@@ -22,7 +22,7 @@ const T &Matrix<T>::MatrixRow::operator[](size_t index) const {
     return data[index];
 }
 
-template<typename T>
+template<MatrixElement T>
 void Matrix<T>::MatrixRow::reset(T *ptr, const size_t new_size) {
     if (new_size > 0 && !ptr) {
         time_t currentTime = time(NULL);
@@ -32,18 +32,18 @@ void Matrix<T>::MatrixRow::reset(T *ptr, const size_t new_size) {
     size = new_size;
 }
 
-template<typename T>
+template<MatrixElement T>
 void Matrix<T>::MatrixRow::reset() {
     size = 0;
     data.reset();
 }
 
-template<typename T>
+template<MatrixElement T>
 T *Matrix<T>::MatrixRow::getAddr() {
     return data.get();
 }
 
-template<typename T>
+template<MatrixElement T>
 const T *Matrix<T>::MatrixRow::getAddr() const {
     return data.get();
 }

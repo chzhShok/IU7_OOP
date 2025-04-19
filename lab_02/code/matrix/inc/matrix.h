@@ -4,82 +4,169 @@
 #include <iostream>
 
 #include "base_matrix.h"
+#include "concept.hpp"
 #include "const_iterator.h"
 #include "iterator.h"
 
-template<typename T>
+template<MatrixElement T>
 class Matrix : public BaseMatrix {
 public:
     class MatrixRow;
     friend class Iterator<T>;
     friend class ConstIterator<T>;
 
-    explicit Matrix(int rows_size = 0, int columns_size = 0);
+    // конструкторы
+    explicit Matrix() = default;
+    explicit Matrix(int rows_size, int columns_size);
     Matrix(int rows_size, int columns_size, const T &value);
     Matrix(int rows_size, int columns_size, T **matrix);
     Matrix(std::initializer_list<std::initializer_list<T>> init_list);
     explicit Matrix(const Matrix &matrix);
-    Matrix(Matrix &&matrix);
+    Matrix(Matrix &&matrix) noexcept;
 
     virtual ~Matrix() = default;
 
+    // методы доступа
     int getRows() const noexcept;
     int getCols() const noexcept;
     bool isEmpty() const noexcept;
 
-    Matrix<T> &operator=(const Matrix &matrix);
-    Matrix<T> &operator=(Matrix &&matrix);
-    Matrix<T> &operator=(std::initializer_list<std::initializer_list<T>> init_list);
+    MatrixRow operator[](int rows_size);
+    const MatrixRow operator[](int rows_size) const;
+    T &at(int rows_size, int columns_size);
+    const T &at(int rows_size, int columns_size) const;
+    T &operator()(int rows_size, int columns_size);
+    const T &operator()(int rows_size, int columns_size) const;
 
-    Matrix<T> operator+(const Matrix &matrix) const;
-    Matrix<T> operator-(const Matrix &matrix) const;
-    Matrix<T> operator*(const Matrix &matrix) const;
-    Matrix<T> operator/(const Matrix &matrix) const;
+    // присваивание
+    Matrix &operator=(const Matrix &matrix);
+    Matrix &operator=(Matrix &&matrix) noexcept;
+    Matrix &operator=(std::initializer_list<std::initializer_list<T>> init_list);
 
-    Matrix<T> addMatrix(const Matrix &matrix) const;
-    Matrix<T> subMatrix(const Matrix &matrix) const;
-    Matrix<T> mulMatrix(const Matrix &matrix) const;
-    Matrix<T> divMatrix(const Matrix &matrix) const;
+    // математика с матрицами
+    template<MatrixArithmetic<T> U>
+    Matrix operator+(const Matrix<U> &matrix) const;
 
-    Matrix<T> operator+(const T &elem) const noexcept;
-    Matrix<T> operator-(const T &elem) const noexcept;
-    Matrix<T> operator*(const T &elem) const noexcept;
-    Matrix<T> operator/(const T &elem) const;
+    template<MatrixArithmetic<T> U>
+    Matrix operator-(const Matrix<U> &matrix) const;
 
-    Matrix<T> addElem(const T &elem) const noexcept;
-    Matrix<T> subElem(const T &elem) const noexcept;
-    Matrix<T> mulElem(const T &elem) const noexcept;
-    Matrix<T> divElem(const T &elem) const;
+    template<MatrixArithmetic<T> U>
+    Matrix operator*(const Matrix<U> &matrix) const;
 
+    template<MatrixArithmetic<T> U>
+    Matrix operator/(const Matrix<U> &matrix) const;
+
+    template<MatrixArithmetic<T> U>
+    Matrix addMatrix(const Matrix<U> &matrix) const;
+
+    template<MatrixArithmetic<T> U>
+    Matrix subMatrix(const Matrix<U> &matrix) const;
+
+    template<MatrixArithmetic<T> U>
+    Matrix mulMatrix(const Matrix<U> &matrix) const;
+
+    template<MatrixArithmetic<T> U>
+    Matrix divMatrix(const Matrix<U> &matrix) const;
+
+    template<MatrixArithmetic<T> U>
+    Matrix &operator+=(const Matrix<U> &matrix);
+
+    template<MatrixArithmetic<T> U>
+    Matrix &operator-=(const Matrix<U> &matrix);
+
+    template<MatrixArithmetic<T> U>
+    Matrix &operator*=(const Matrix<U> &matrix);
+
+    template<MatrixArithmetic<T> U>
+    Matrix &operator/=(const Matrix<U> &matrix);
+
+    template<MatrixArithmetic<T> U>
+    Matrix &addEqMatrix(const Matrix<U> &matrix);
+
+    template<MatrixArithmetic<T> U>
+    Matrix &subEqMatrix(const Matrix<U> &matrix);
+
+    template<MatrixArithmetic<T> U>
+    Matrix &mulEqMatrix(const Matrix<U> &matrix);
+
+    template<MatrixArithmetic<T> U>
+    Matrix &divEqMatrix(const Matrix<U> &matrix);
+
+    // математика с элементами
+    template<ElementArithmetic<T> U>
+    Matrix operator+(const U& elem) const noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix operator-(const U &elem) const noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix operator*(const U &elem) const noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix operator/(const U &elem) const;
+
+    template<ElementArithmetic<T> U>
+    Matrix addElem(const U &elem) const noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix subElem(const U &elem) const noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix mulElem(const U &elem) const noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix divElem(const U &elem) const;
+
+    template<ElementArithmetic<T> U>
+    Matrix &operator+=(const U &elem) noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix &operator-=(const U &elem) noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix &operator*=(const U &elem) noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix &operator/=(const U &elem);
+
+    template<ElementArithmetic<T> U>
+    Matrix &addEqElem(const U &elem) noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix &subEqElem(const U &elem) noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix &mulEqElem(const U &elem) noexcept;
+
+    template<ElementArithmetic<T> U>
+    Matrix &divEqElem(const U &elem);
+
+    // размеры
     void resize(int rows_size, int columns_size, const T &value = {});
+    void resizeRows(int new_size, const T &filler = {});
+    void resizeCols(int new_size, const T &filler = {});
+    void insertRow(size_t pos, const T &filler = {});
+    void insertCol(size_t pos, const T &filler = {});
+    void deleteRow(size_t pos);
+    void deleteCol(size_t pos);
+
+    // доп методы
+    template<ElementArithmetic U = T>
     void inverse();
+
+    template<ElementArithmetic U = T>
+    U determinant() const;
+
     bool isSquare() const;
-    T determinant() const;
+
     void transpose();
+    void swapRows(size_t row1, size_t row2);
+    void swapCols(size_t col1, size_t col2);
 
-    Matrix<T> operator-();
-    Matrix<T> neg();
+    Matrix operator-();
+    Matrix neg();
 
-    Matrix<T> &operator+=(const Matrix &matrix);
-    Matrix<T> &operator-=(const Matrix &matrix);
-    Matrix<T> &operator*=(const Matrix &matrix);
-    Matrix<T> &operator/=(const Matrix &matrix);
-
-    Matrix<T> &addEqMatrix(const Matrix &matrix);
-    Matrix<T> &subEqMatrix(const Matrix &matrix);
-    Matrix<T> &mulEqMatrix(const Matrix &matrix);
-    Matrix<T> &divEqMatrix(const Matrix &matrix);
-
-    Matrix<T> &operator+=(const T &elem) noexcept;
-    Matrix<T> &operator-=(const T &elem) noexcept;
-    Matrix<T> &operator*=(const T &elem) noexcept;
-    Matrix<T> &operator/=(const T &elem);
-
-    Matrix<T> &addEqElem(const T &elem) noexcept;
-    Matrix<T> &subEqElem(const T &elem) noexcept;
-    Matrix<T> &mulEqElem(const T &elem) noexcept;
-    Matrix<T> &divEqElem(const T &elem);
-
+    // итераторы
     ConstIterator<T> begin() const;
     ConstIterator<T> end() const;
     Iterator<T> begin();
@@ -92,24 +179,9 @@ public:
     void fill(Iterator<T> start, ConstIterator<T> source_start, const ConstIterator<T> &source_end);
     void reverseSeq(Iterator<T> start, Iterator<T> end);
 
-    void resizeRows(int new_size, const T &filler = {});
-    void resizeCols(int new_size, const T &filler = {});
-
-    void insertRow(size_t pos, const T &filler = {});
-    void insertCol(size_t pos, const T &filler = {});
-
-    void deleteRow(size_t pos);
-    void deleteCol(size_t pos);
-
+    // сравнение
     bool operator==(const Matrix &matrix) const;
     bool operator!=(const Matrix &matrix) const;
-
-    MatrixRow operator[](int rows_size);
-    const MatrixRow operator[](int rows_size) const;
-    T &at(int rows_size, int columns_size);
-    const T &at(int rows_size, int columns_size) const;
-    T &operator()(int rows_size, int columns_size);
-    const T &operator()(int rows_size, int columns_size) const;
 
 private:
     std::shared_ptr<MatrixRow[]> allocateMemory(int rows_size, int columns_size);
@@ -150,7 +222,7 @@ public:
     };
 };
 
-template<typename T>
+template<MatrixElement T>
 std::ostream &operator<<(std::ostream &out, const Matrix<T> &matrix) {
     for (int i = 0; i < matrix.getRows(); ++i) {
         if (i != 0)

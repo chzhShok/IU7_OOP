@@ -1,43 +1,43 @@
 #pragma once
 
-template<typename T>
+template<MatrixElement T>
 Iterator<T> Matrix<T>::begin() {
     return Iterator<T>(*this, 0);
 }
 
-template<typename T>
+template<MatrixElement T>
 Iterator<T> Matrix<T>::end() {
     return Iterator<T>(*this, cols * rows);
 }
 
-template<typename T>
+template<MatrixElement T>
 ConstIterator<T> Matrix<T>::begin() const {
     return ConstIterator<T>(*this, 0);
 }
 
-template<typename T>
+template<MatrixElement T>
 ConstIterator<T> Matrix<T>::end() const {
     return ConstIterator<T>(*this, cols * rows);
 }
 
 
-template<typename T>
+template<MatrixElement T>
 ConstIterator<T> Matrix<T>::cbegin() const {
     return ConstIterator<T>(*this, 0);
 }
 
-template<typename T>
+template<MatrixElement T>
 ConstIterator<T> Matrix<T>::cend() const {
     return ConstIterator<T>(*this, cols * rows);
 }
 
-template<typename T>
+template<MatrixElement T>
 void Matrix<T>::fill(Iterator<T> start, const Iterator<T> &end, const T &value) {
     for (auto iter = start; iter < end; ++iter)
         *iter = value;
 }
 
-template<typename T>
+template<MatrixElement T>
 void Matrix<T>::fill(Iterator<T> start, Iterator<T> source_start, const Iterator<T> &source_end) {
     auto source_iter = source_start;
     auto iter = start;
@@ -49,7 +49,7 @@ void Matrix<T>::fill(Iterator<T> start, Iterator<T> source_start, const Iterator
     }
 }
 
-template<typename T>
+template<MatrixElement T>
 void Matrix<T>::fill(Iterator<T> start, ConstIterator<T> source_start, const ConstIterator<T> &source_end) {
     auto source_iter = source_start;
     auto iter = start;
@@ -61,7 +61,7 @@ void Matrix<T>::fill(Iterator<T> start, ConstIterator<T> source_start, const Con
     }
 }
 
-template<typename T>
+template<MatrixElement T>
 void Matrix<T>::reverseSeq(Iterator<T> start, Iterator<T> end) {
     end = end - 1;
     for (; start < end; start++, end = end - 1) {

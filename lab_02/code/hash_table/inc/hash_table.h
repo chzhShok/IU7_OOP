@@ -9,10 +9,8 @@
 #define DEFAULT_MAX_LOAD_FACTOR 1.0
 
 template<typename Key, typename Value>
-class HashTable : BaseHashTable {
+class HashTable : public BaseHashTable {
 public:
-    friend class HashTable<Key, Value>;
-
     explicit HashTable(size_t initial_size = 16);
     HashTable(size_t initial_size, double max_load_factor);
     HashTable(std::initializer_list<std::pair<Key, Value>> init_list);
@@ -45,7 +43,8 @@ public:
     HashTableConstIterator<Key, Value> cend() const noexcept;
 
     Value &operator[](const Key &key);
-    const Value &operator[](const Key &key) const;
+    // в реализации unordered_map нет такого, так как подразумевается, что если ключа нет, что он добавляется
+//    const Value &operator[](const Key &key) const;
     Value &at(const Key &key);
     const Value &at(const Key &key) const;
 

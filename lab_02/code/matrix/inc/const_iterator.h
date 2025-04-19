@@ -4,35 +4,44 @@
 #include <string>
 
 #include "base_iterator.h"
+#include "concept.hpp"
 #include "exception.h"
 
-template<typename T>
+template<MatrixElement T>
 class Matrix;
 
-template<typename T>
+template<MatrixElement T>
 class ConstIterator : public BaseIterator {
 public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const T *;
+    using reference = const T &;
+
     ConstIterator(const Matrix<T> &);
     ConstIterator(const ConstIterator<T> &);
     ConstIterator(const ConstIterator<T> &, size_t new_index);
 
-    const T &operator*() const;
-    const T *operator->() const;
+    const reference operator*() const;
+    const pointer operator->() const;
+    reference operator[](int n) const;
+
     operator bool() const;
 
-    const T &value() const;
+    const reference value() const;
 
-    ConstIterator<T> &operator=(const ConstIterator<T> &iterator);
+    ConstIterator &operator=(const ConstIterator<T> &iterator);
 
-    ConstIterator<T> &operator+=(int value);
-    ConstIterator<T> &operator++();  // префиксный инкремент
-    ConstIterator<T> operator++(int);// постфиксный инкремент
-    ConstIterator<T> operator+(int value) const;
+    ConstIterator &operator+=(int value);
+    ConstIterator &operator++();  // префиксный инкремент
+    ConstIterator operator++(int);// постфиксный инкремент
+    ConstIterator operator+(int value) const;
 
-    ConstIterator<T> &operator-=(int value);
-    ConstIterator<T> &operator--();  // префиксный декремент
-    ConstIterator<T> operator--(int);// постфиксный декремент
-    ConstIterator<T> operator-(int value) const;
+    ConstIterator &operator-=(int value);
+    ConstIterator &operator--();  // префиксный декремент
+    ConstIterator operator--(int);// постфиксный декремент
+    ConstIterator operator-(int value) const;
 
     bool operator<=(const ConstIterator<T> &iterator) const;
     bool operator<(const ConstIterator<T> &iterator) const;
@@ -44,13 +53,12 @@ public:
     bool isEnd() const;
     bool isValid() const;
 
-    ConstIterator<T> &next();
+    ConstIterator &next();
 
-protected:
+private:
     void check_index(int line) const;
     void check_validity(int line) const;
 
-private:
     std::weak_ptr<typename Matrix<T>::MatrixRow[]> data{};
     int index = 0;
     size_t rows = 0;

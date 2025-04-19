@@ -1,7 +1,9 @@
 #pragma once
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator=(const Matrix &matrix) {
+#include "concept.hpp"
+
+template<MatrixElement T>
+Matrix<T> &Matrix<T>::operator=(const Matrix<T> &matrix) {
     initialize(matrix.rows, matrix.cols);
 
     for (int i = 0; i < rows; ++i)
@@ -11,8 +13,8 @@ Matrix<T> &Matrix<T>::operator=(const Matrix &matrix) {
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator=(Matrix &&matrix) {
+template<MatrixElement T>
+Matrix<T> &Matrix<T>::operator=(Matrix<T> &&matrix) noexcept {
     data = matrix.data;
     rows = matrix.rows;
     cols = matrix.cols;
@@ -20,7 +22,7 @@ Matrix<T> &Matrix<T>::operator=(Matrix &&matrix) {
     return *this;
 }
 
-template<typename T>
+template<MatrixElement T>
 Matrix<T> &Matrix<T>::operator=(std::initializer_list<std::initializer_list<T>> init_list) {
     if (init_list.size() == 0) {
         time_t currentTime = time(NULL);
@@ -36,7 +38,7 @@ Matrix<T> &Matrix<T>::operator=(std::initializer_list<std::initializer_list<T>> 
             throw InvalidArgument(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
         }
 
-    resize(rows, cols);
+    resize(rows_init_list, cols_init_list);
     int i = 0;
     for (const auto &row: init_list)
         for (const auto &elem: row) {
@@ -47,8 +49,9 @@ Matrix<T> &Matrix<T>::operator=(std::initializer_list<std::initializer_list<T>> 
     return *this;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator+(const Matrix &matrix) const {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::operator+(const Matrix<U> &matrix) const {
     checkSizes(matrix);
     Matrix<T> tmp(rows, cols);
 
@@ -59,8 +62,9 @@ Matrix<T> Matrix<T>::operator+(const Matrix &matrix) const {
     return tmp;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator-(const Matrix &matrix) const {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::operator-(const Matrix<U> &matrix) const {
     checkSizes(matrix);
     Matrix<T> tmp(rows, cols);
 
@@ -71,8 +75,9 @@ Matrix<T> Matrix<T>::operator-(const Matrix &matrix) const {
     return tmp;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator*(const Matrix &matrix) const {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::operator*(const Matrix<U> &matrix) const {
     checkMultSizes(matrix);
     Matrix<T> tmp(rows, matrix.cols);
 
@@ -84,34 +89,39 @@ Matrix<T> Matrix<T>::operator*(const Matrix &matrix) const {
     return tmp;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator/(const Matrix &matrix) const {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::operator/(const Matrix<U> &matrix) const {
     Matrix<T> tmp(matrix);
     tmp.inverse();
     return operator*(tmp);
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::addMatrix(const Matrix &matrix) const {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::addMatrix(const Matrix<U> &matrix) const {
     return operator+(matrix);
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::subMatrix(const Matrix &matrix) const {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::subMatrix(const Matrix<U> &matrix) const {
     return operator-(matrix);
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::mulMatrix(const Matrix &matrix) const {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::mulMatrix(const Matrix<U> &matrix) const {
     return operator*(matrix);
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::divMatrix(const Matrix &matrix) const {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::divMatrix(const Matrix<U> &matrix) const {
     return operator/(matrix);
 }
 
-template<typename T>
+template<MatrixElement T>
 Matrix<T> Matrix<T>::operator-() {
     Matrix<T> tmp(rows, cols);
 
@@ -122,13 +132,14 @@ Matrix<T> Matrix<T>::operator-() {
     return tmp;
 }
 
-template<typename T>
+template<MatrixElement T>
 Matrix<T> Matrix<T>::neg() {
     return operator-();
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator+=(const Matrix &matrix) {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator+=(const Matrix<U> &matrix) {
     checkSizes(matrix);
 
     for (int i = 0; i < rows; ++i)
@@ -138,8 +149,9 @@ Matrix<T> &Matrix<T>::operator+=(const Matrix &matrix) {
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator-=(const Matrix &matrix) {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator-=(const Matrix<U> &matrix) {
     checkSizes(matrix);
 
     for (int i = 0; i < rows; ++i)
@@ -149,8 +161,9 @@ Matrix<T> &Matrix<T>::operator-=(const Matrix &matrix) {
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator*=(const Matrix &matrix) {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator*=(const Matrix<U> &matrix) {
     checkSizes(matrix);
     checkMultSizes(matrix);
 
@@ -166,35 +179,40 @@ Matrix<T> &Matrix<T>::operator*=(const Matrix &matrix) {
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::operator/=(const Matrix &matrix) {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator/=(const Matrix<U> &matrix) {
     Matrix<T> tmp = operator/(matrix);
     *this = tmp;
 
     return *this;
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::addEqMatrix(const Matrix &matrix) {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::addEqMatrix(const Matrix<U> &matrix) {
     return operator+=(matrix);
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::subEqMatrix(const Matrix &matrix) {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::subEqMatrix(const Matrix<U> &matrix) {
     return operator-=(matrix);
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::mulEqMatrix(const Matrix &matrix) {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::mulEqMatrix(const Matrix<U> &matrix) {
     return operator*=(matrix);
 }
 
-template<typename T>
-Matrix<T> &Matrix<T>::divEqMatrix(const Matrix &matrix) {
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::divEqMatrix(const Matrix<U> &matrix) {
     return operator/=(matrix);
 }
 
-template<typename T>
+template<MatrixElement T>
 bool Matrix<T>::operator==(const Matrix &matrix) const {
     if ((rows != matrix.rows) || (cols != matrix.cols))
         return false;
@@ -207,37 +225,37 @@ bool Matrix<T>::operator==(const Matrix &matrix) const {
     return true;
 }
 
-template<typename T>
+template<MatrixElement T>
 bool Matrix<T>::operator!=(const Matrix &matrix) const {
     return !operator==(matrix);
 }
 
-template<typename T>
+template<MatrixElement T>
 Matrix<T>::MatrixRow Matrix<T>::operator[](int rows_size) {
     return data[rows_size];
 }
 
-template<typename T>
+template<MatrixElement T>
 const Matrix<T>::MatrixRow Matrix<T>::operator[](int rows_size) const {
     return data[rows_size];
 }
 
-template<typename T>
+template<MatrixElement T>
 T &Matrix<T>::at(int rows_size, int columns_size) {
     return data[rows_size][columns_size];
 }
 
-template<typename T>
+template<MatrixElement T>
 const T &Matrix<T>::at(int rows_size, int columns_size) const {
     return data[rows_size][columns_size];
 }
 
-template<typename T>
+template<MatrixElement T>
 T &Matrix<T>::operator()(int rows_size, int columns_size) {
     return data[rows_size][columns_size];
 }
 
-template<typename T>
+template<MatrixElement T>
 const T &Matrix<T>::operator()(int rows_size, int columns_size) const {
     return data[rows_size][columns_size];
 }
