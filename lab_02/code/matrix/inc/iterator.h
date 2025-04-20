@@ -9,7 +9,6 @@
 template<MatrixElement T>
 class Matrix;
 
-// random access iterator
 template<MatrixElement T>
 class Iterator : public BaseIterator {
 public:

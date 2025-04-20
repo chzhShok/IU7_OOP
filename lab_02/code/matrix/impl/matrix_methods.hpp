@@ -62,7 +62,7 @@ Matrix<T>::Matrix(std::initializer_list<std::initializer_list<T>> init_list) {
 
 template<MatrixElement T>
 Matrix<T>::Matrix(const Matrix &matrix) {
-    initialize(matrix.rows, matrix.rows);
+    initialize(matrix.rows, matrix.cols);
 
     for (int i = 0; i < rows; i++)
         for (int j = 0; j < cols; j++)
@@ -97,7 +97,7 @@ std::shared_ptr<typename Matrix<T>::MatrixRow[]> Matrix<T>::allocateMemory(int r
     try {
         matrix_rows.reset(new MatrixRow[rows_size]);
         for (int i = 0; i < rows_size; i++) {
-            T *row_data = new T[cols_size];
+            T *row_data = new T[cols_size]();
             matrix_rows[i].reset(row_data, cols_size);
         }
     } catch (std::bad_alloc &error) {
@@ -126,16 +126,18 @@ void Matrix<T>::initialize(int rows_size, int columns_size) {
 }
 
 template<MatrixElement T>
-void Matrix<T>::checkSizes(const Matrix<T> &matrix) const {
-    if (rows != matrix.rows || cols != matrix.cols) {
+template<MatrixElement U>
+void Matrix<T>::checkSizes(const Matrix<U> &matrix) const {
+    if (rows != matrix.getRows() || cols != matrix.getCols()) {
         time_t currentTime = time(nullptr);
         throw IncompatibleMatrices(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
     }
 }
 
 template<MatrixElement T>
-void Matrix<T>::checkMultSizes(const Matrix<T> &matrix) const {
-    if (cols != matrix.rows) {
+template<MatrixElement U>
+void Matrix<T>::checkMultSizes(const Matrix<U> &matrix) const {
+    if (cols != matrix.getRows()) {
         time_t currentTime = time(nullptr);
         throw IncompatibleMatrices(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
     }
@@ -175,34 +177,6 @@ void Matrix<T>::moveCol(size_t from, size_t to) {
 
         data[j][to] = tmp;
     }
-}
-
-template<MatrixElement T>
-void Matrix<T>::resize(int rows_size, int columns_size, const T &value) {
-    if ((rows_size <= 0 || columns_size <= 0)) {
-        time_t currentTime = time(nullptr);
-        throw InvalidSize(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
-    }
-
-    auto tmp = allocateMemory(rows_size, columns_size);
-
-    if (data) {
-        for (int i = 0; i < std::min(rows, rows_size); ++i) {
-            for (int j = 0; j < std::min(cols, columns_size); ++j)
-                tmp[i][j] = data[i][j];
-
-            for (int j = cols; j < columns_size; ++j)
-                tmp[i][j] = value;
-        }
-    }
-
-    for (int i = rows; i < rows_size; ++i)
-        for (int j = 0; j < columns_size; ++j)
-            tmp[i][j] = value;
-
-    data = tmp;
-    rows = rows_size;
-    cols = columns_size;
 }
 
 template<MatrixElement T>
@@ -322,8 +296,69 @@ void Matrix<T>::inverse() {
 }
 
 template<MatrixElement T>
+void Matrix<T>::resize(int new_rows, int new_cols) {
+    static_assert(std::is_default_constructible_v<T>, "Type T must be default constructible for resize() without fill value");
+    resize(new_rows, new_cols, T{});
+}
+
+template<MatrixElement T>
+void Matrix<T>::resize(int rows_size, int columns_size, const T &value) {
+    if ((rows_size < 0 || columns_size < 0)) {
+        time_t currentTime = time(nullptr);
+        throw InvalidSize(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
+    }
+
+    if (rows_size == 0 || columns_size == 0) {
+        data.reset();
+        rows = 0;
+        cols = 0;
+        return;
+    }
+
+    if (rows_size == rows && columns_size == cols) {
+        return;
+    }
+
+    auto new_data = allocateMemory(rows_size, columns_size);
+
+    const int rows_to_copy = std::min(rows, rows_size);
+    const int cols_to_copy = std::min(cols, columns_size);
+
+    for (int i = 0; i < rows_to_copy; ++i) {
+        for (int j = 0; j < cols_to_copy; ++j) {
+            if constexpr (std::is_move_constructible_v<T>)
+                new_data[i][j] = std::move(data[i][j]);
+            else
+                new_data[i][j] = data[i][j];
+        }
+    }
+
+    if (rows_size > rows || columns_size > cols)
+        for (int i = 0; i < rows_size; ++i)
+            for (int j = 0; j < columns_size; ++j)
+                if (i >= rows || j >= cols)
+                    new_data[i][j] = value;
+
+    data = std::move(new_data);
+    rows = rows_size;
+    cols = columns_size;
+}
+
+template<MatrixElement T>
+void Matrix<T>::resizeRows(int new_size) {
+    static_assert(std::is_default_constructible_v<T>, "Type T must be default constructible for resize() without fill value");
+    resize(new_size, cols, T{});
+}
+
+template<MatrixElement T>
 void Matrix<T>::resizeRows(int new_size, const T &filler) {
     resize(new_size, cols, filler);
+}
+
+template<MatrixElement T>
+void Matrix<T>::resizeCols(int new_size) {
+    static_assert(std::is_default_constructible_v<T>, "Type T must be default constructible for resize() without fill value");
+    resize(rows, new_size, T{});
 }
 
 template<MatrixElement T>
@@ -347,46 +382,28 @@ void Matrix<T>::insertCol(size_t pos, const T &filler) {
     resizeCols(cols + 1);
     for (size_t i = 0; i < rows; i++)
         data[i][cols - 1] = filler;
+
     moveCol(cols - 1, pos);
 }
 
 template<MatrixElement T>
 void Matrix<T>::deleteRow(size_t pos) {
-    checkIndex(pos, rows - 1);
-    auto tmp = allocateMemory(rows - 1, cols);
+    checkIndex(pos, static_cast<size_t>(rows));
+    for (size_t i = pos; i + 1 < static_cast<size_t>(rows); ++i)
+        swapRows(i, i + 1);
 
-    size_t si = 0, di = 0;
-    while (si < rows) {
-        if (si != pos) {
-            for (size_t i = 0; i < cols; ++i)
-                tmp[di][i] = data[si][i];
-            ++di;
-        }
-        ++si;
-    }
-
-    data = tmp;
-    --rows;
+    resize(rows - 1, cols);
 }
 
 template<MatrixElement T>
 void Matrix<T>::deleteCol(size_t pos) {
-    checkIndex(pos, cols - 1);
-    auto tmp = allocateMemory(rows, cols - 1);
+    checkIndex(pos, static_cast<size_t>(cols));
+    for (size_t i = pos; i + 1 < static_cast<size_t>(cols); ++i)
+        swapCols(i, i + 1);
 
-    size_t si = 0, di = 0;
-    while (si < cols) {
-        if (si != pos) {
-            for (size_t i = 0; i < rows; ++i)
-                tmp[i][di] = data[i][si];
-            ++di;
-        }
-        ++si;
-    }
-
-    data = tmp;
-    --cols;
+    resize(rows, cols - 1);
 }
+
 
 template<MatrixElement T>
 void Matrix<T>::swapRows(size_t row1, size_t row2) {

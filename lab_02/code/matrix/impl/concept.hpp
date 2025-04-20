@@ -9,19 +9,15 @@
 template<typename T>
 concept MatrixElement =
         std::copyable<T> &&
-        std::equality_comparable<T> &&
-        requires(std::ostream &os, const T &val) {
-            { os << val } -> std::same_as<std::ostream &>;
-        };
+        std::equality_comparable<T>;
 
 template<typename T, typename U = T>
-concept ElementArithmetic = MatrixElement<T> && requires(T a, U b) {
+concept ElementArithmetic = MatrixElement<T> && requires(const T &a, U b) {
     { a + b } -> std::convertible_to<T>;
     { a - b } -> std::convertible_to<T>;
     { a *b } -> std::convertible_to<T>;
     { a / b } -> std::convertible_to<T>;
     { -a } -> std::convertible_to<T>;
-    { std::abs(a) } -> std::convertible_to<T>;
 };
 
 template<typename T1, typename T2>

@@ -52,77 +52,101 @@ Matrix<T> &Matrix<T>::operator=(std::initializer_list<std::initializer_list<T>> 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> Matrix<T>::operator+(const Matrix<U> &matrix) const {
-    checkSizes(matrix);
-    Matrix<T> tmp(rows, cols);
-
-    for (int i = 0; i < rows; ++i)
-        for (int j = 0; j < cols; ++j)
-            tmp[i][j] = data[i][j] + matrix[i][j];
-
-    return tmp;
+    return addMatrix(matrix);
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> Matrix<T>::operator-(const Matrix<U> &matrix) const {
-    checkSizes(matrix);
-    Matrix<T> tmp(rows, cols);
-
-    for (int i = 0; i < rows; ++i)
-        for (int j = 0; j < cols; ++j)
-            tmp[i][j] = data[i][j] - matrix[i][j];
-
-    return tmp;
+    return subMatrix(matrix);
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> Matrix<T>::operator*(const Matrix<U> &matrix) const {
-    checkMultSizes(matrix);
-    Matrix<T> tmp(rows, matrix.cols);
+    return mulMatrix(matrix);
+}
+
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::mulByElement(const Matrix<U> &matrix) const {
+    checkSizes(matrix);
+    Matrix<T> result(rows, cols);
 
     for (int i = 0; i < rows; ++i)
-        for (int j = 0; j < matrix.cols; ++j)
-            for (int k = 0; k < cols; ++k)
-                tmp[i][j] += data[i][k] * matrix[k][j];
+        for (int j = 0; j < cols; ++j)
+            result[i][j] = data[i][j] * matrix[i][j];
 
-    return tmp;
+    return result;
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> Matrix<T>::operator/(const Matrix<U> &matrix) const {
-    Matrix<T> tmp(matrix);
-    tmp.inverse();
-    return operator*(tmp);
+    return divMatrix(matrix);
+}
+
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> Matrix<T>::divByElement(const Matrix<U> &matrix) const {
+    checkSizes(matrix);
+    Matrix<T> result(rows, cols);
+
+    for (int i = 0; i < rows; ++i)
+        for (int j = 0; j < cols; ++j) {
+            if (is_zero(matrix[i][j])) {
+                time_t currentTime = time(NULL);
+                throw ZeroDivision(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
+            }
+
+            result[i][j] = data[i][j] / matrix[i][j];
+        }
+
+    return result;
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> Matrix<T>::addMatrix(const Matrix<U> &matrix) const {
-    return operator+(matrix);
+    checkSizes(matrix);
+    Matrix<T> result(*this);
+    result += matrix;
+    return result;
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> Matrix<T>::subMatrix(const Matrix<U> &matrix) const {
-    return operator-(matrix);
+    checkSizes(matrix);
+    Matrix<T> result(*this);
+    result -= matrix;
+    return result;
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> Matrix<T>::mulMatrix(const Matrix<U> &matrix) const {
-    return operator*(matrix);
+    checkMultSizes(matrix);
+    Matrix<T> result(*this);
+    result *= matrix;
+    return result;
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> Matrix<T>::divMatrix(const Matrix<U> &matrix) const {
-    return operator/(matrix);
+    Matrix<T> result(*this);
+    result /= matrix;
+    return result;
 }
 
 template<MatrixElement T>
 Matrix<T> Matrix<T>::operator-() {
+    return neg();
+}
+
+template<MatrixElement T>
+Matrix<T> Matrix<T>::neg() {
     Matrix<T> tmp(rows, cols);
 
     for (int i = 0; i < rows; ++i)
@@ -133,13 +157,32 @@ Matrix<T> Matrix<T>::operator-() {
 }
 
 template<MatrixElement T>
-Matrix<T> Matrix<T>::neg() {
-    return operator-();
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator+=(const Matrix<U> &matrix) {
+    return addEqMatrix(matrix);
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
-Matrix<T> &Matrix<T>::operator+=(const Matrix<U> &matrix) {
+Matrix<T> &Matrix<T>::operator-=(const Matrix<U> &matrix) {
+    return subEqMatrix(matrix);
+}
+
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator*=(const Matrix<U> &matrix) {
+    return mulEqMatrix(matrix);
+}
+
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::operator/=(const Matrix<U> &matrix) {
+    return divEqMatrix(matrix);
+}
+
+template<MatrixElement T>
+template<MatrixArithmetic<T> U>
+Matrix<T> &Matrix<T>::addEqMatrix(const Matrix<U> &matrix) {
     checkSizes(matrix);
 
     for (int i = 0; i < rows; ++i)
@@ -151,7 +194,7 @@ Matrix<T> &Matrix<T>::operator+=(const Matrix<U> &matrix) {
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
-Matrix<T> &Matrix<T>::operator-=(const Matrix<U> &matrix) {
+Matrix<T> &Matrix<T>::subEqMatrix(const Matrix<U> &matrix) {
     checkSizes(matrix);
 
     for (int i = 0; i < rows; ++i)
@@ -163,53 +206,28 @@ Matrix<T> &Matrix<T>::operator-=(const Matrix<U> &matrix) {
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
-Matrix<T> &Matrix<T>::operator*=(const Matrix<U> &matrix) {
-    checkSizes(matrix);
+Matrix<T> &Matrix<T>::mulEqMatrix(const Matrix<U> &matrix) {
     checkMultSizes(matrix);
 
-    Matrix<T> tmp(rows, cols);
+    Matrix<T> tmp(rows, matrix.cols);
 
     for (int i = 0; i < rows; ++i)
-        for (int j = 0; j < cols; ++j)
-            for (int k = 0; k < rows; ++k)
-                tmp[i][j] += data[i][k] + matrix[k][j];
+        for (int j = 0; j < matrix.getCols(); ++j)
+            for (int k = 0; k < cols; ++k)
+                tmp[i][j] += data[i][k] * matrix[k][j];
 
     *this = tmp;
 
     return *this;
-}
-
-template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> &Matrix<T>::operator/=(const Matrix<U> &matrix) {
-    Matrix<T> tmp = operator/(matrix);
-    *this = tmp;
-
-    return *this;
-}
-
-template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> &Matrix<T>::addEqMatrix(const Matrix<U> &matrix) {
-    return operator+=(matrix);
-}
-
-template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> &Matrix<T>::subEqMatrix(const Matrix<U> &matrix) {
-    return operator-=(matrix);
-}
-
-template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> &Matrix<T>::mulEqMatrix(const Matrix<U> &matrix) {
-    return operator*=(matrix);
 }
 
 template<MatrixElement T>
 template<MatrixArithmetic<T> U>
 Matrix<T> &Matrix<T>::divEqMatrix(const Matrix<U> &matrix) {
-    return operator/=(matrix);
+    Matrix<T> inverseMatrix(matrix);
+    inverseMatrix.inverse();
+    *this *= inverseMatrix;
+    return *this;
 }
 
 template<MatrixElement T>
@@ -231,12 +249,12 @@ bool Matrix<T>::operator!=(const Matrix &matrix) const {
 }
 
 template<MatrixElement T>
-Matrix<T>::MatrixRow Matrix<T>::operator[](int rows_size) {
+Matrix<T>::MatrixRow &Matrix<T>::operator[](int rows_size) {
     return data[rows_size];
 }
 
 template<MatrixElement T>
-const Matrix<T>::MatrixRow Matrix<T>::operator[](int rows_size) const {
+const Matrix<T>::MatrixRow &Matrix<T>::operator[](int rows_size) const {
     return data[rows_size];
 }
 

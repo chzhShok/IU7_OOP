@@ -28,6 +28,7 @@ void Matrix<T>::MatrixRow::reset(T *ptr, const size_t new_size) {
         time_t currentTime = time(NULL);
         throw InvalidArgument(__FILE__, typeid(*this).name(), __LINE__, ctime(&currentTime));
     }
+
     data.reset(ptr);
     size = new_size;
 }

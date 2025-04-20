@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include "matrix.h"
 
@@ -9,6 +10,44 @@
 //#define CONST_ITERATORS
 #define MATH_OPERATIONS
 //#define ERRORS
+
+struct Decimal {
+    int value;
+    Decimal() = default;
+    Decimal(int v) : value(v) {}
+    Decimal operator/(const Decimal &other) const {
+        if (other.value == 0) throw std::runtime_error("Division by zero");
+        return Decimal(value / other.value);
+    }
+
+    Decimal operator+(const Decimal &other) const {
+        return Decimal(value + other.value);
+    }
+
+    Decimal operator-(const Decimal &other) const {
+        return Decimal(value - other.value);
+    }
+
+    Decimal operator*(const Decimal &other) const {
+        return Decimal(value * other.value);
+    }
+
+    Decimal operator-() const {
+        return Decimal(-value);
+    }
+
+    Decimal &operator/=(const Decimal &other) {
+        if (other.value == 0) throw std::runtime_error("Division by zero");
+        value /= other.value;
+        return *this;
+    }
+
+    bool operator==(const Decimal &other) const { return value == other.value; }
+
+    friend std::ostream &operator<<(std::ostream &os, const Decimal &d) {
+        return os << d.value;
+    }
+};
 
 int main() {
 #ifdef CONSTRUCTOR
@@ -57,6 +96,21 @@ int main() {
     std::cout << "Constructor with initialization list [Matrix<double> c({ { 2., 3. }, { 3., 4. } })]:\n";
     Matrix<double> c({{2., 3.}, {3., 4.}});
     std::cout << c << "\n\n";
+
+    std::cout << "Constructor with array:\n";
+    int **arr = new int *[2];
+    arr[0] = new int[3]{1, 2, 3};
+    arr[1] = new int[3]{4, 5, 6};
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 3; j++)
+            std::cout << arr[i][j] << " ";
+        std::cout << "\n";
+    }
+
+    Matrix<int> m_array(2, 3, arr);
+    std::cout << "Matrix from array:\n"
+              << m_array << std::endl;
 
     std::cout << "CONSTRUCTOR SECTION END\n\n\n";
 //    CONSTRUCTOR-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
@@ -110,6 +164,22 @@ int main() {
     std::cout << "Command: c_insert.resize(c_insert.getRows() - 2, c_insert.getCols() - 1);\n";
     c_insert.resize(c_insert.getRows() - 2, c_insert.getCols() - 1);
     std::cout << c_insert << "\n\n";
+
+    // TODO
+    /*
+    struct NoDefault {
+        int value;
+
+        explicit NoDefault(int val) : value(val) {}
+        NoDefault() = delete;
+        NoDefault(const NoDefault &) = default;
+        bool operator==(const NoDefault &other) const = default;
+    };
+
+    Matrix<NoDefault> m(2, 2, NoDefault{42});
+
+    m.resize(3, 3, NoDefault{100});
+     */
 
     std::cout << "Check of transpose method on matrix c_insert (but first - resize (+ 2 rows)):\n";
     std::cout << "Command: c_insert.resizeRows(c_insert.getRows() + 2, 32.10);\n";
@@ -208,7 +278,7 @@ int main() {
     std::cout << "c_m_tmp matrix:\n"
               << c_m_tmp << "\n\n";
     std::cout << "Insert command: c_m_tmp.fill(c_m_tmp.begin(), const_m.begin(), const_m.begin() + 3);\n";
-    c_m_tmp.fill(c_m_tmp.begin(), const_m.begin(), const_m.begin() + 3);
+    c_m_tmp.fill(c_m_tmp.begin(), const_m.cbegin(), const_m.cbegin() + 3);
     std::cout << "c_m_tmp matrix after insertion: \n"
               << c_m_tmp << "\n\n";
 
@@ -250,26 +320,22 @@ int main() {
     std::cout << "matrix after operation:\n";
     std::cout << math_matrix << "\n\n";
 
-    std::cout << "Same operations, but using METHODS\n";
-    std::cout << "Operation: math_matrix.addEqElem(2.5);\n";
-    math_matrix.addEqElem(2.5);
-    std::cout << "matrix after operation:\n";
-    std::cout << math_matrix << "\n\n";
+    std::cout << "Operation /: math_matrix filled with Decimal\n";
+    Matrix<Decimal> m2(2, 2, Decimal{10});
+    std::cout << m2 << "\n\n";
 
-    std::cout << "Operation: math_matrix.subEqElem(2.5);\n";
-    math_matrix.subEqElem(2.5);
-    std::cout << "matrix after operation:\n";
-    std::cout << math_matrix << "\n\n";
+    std::cout << "Divide by 2:\n";
+    Matrix<Decimal> m3;
+    m3 = m2 / Decimal{2};
+    std::cout << m3 << "\n\n";
 
-    std::cout << "Operation: math_matrix.mulEqElem(2.5);\n";
-    math_matrix.mulEqElem(2.5);
-    std::cout << "matrix after operation:\n";
-    std::cout << math_matrix << "\n\n";
-
-    std::cout << "Operation: math_matrix.divEqElem(2.5);\n";
-    math_matrix.divEqElem(2.5);
-    std::cout << "matrix after operation:\n";
-    std::cout << math_matrix << "\n\n";
+    std::cout << "Divide by 0:\n";
+    try {
+        m3 = m2 / Decimal{0};
+        std::cout << m3 << "\n\n";
+    } catch (ExceptionMatrix &err) {
+        std::cout << err.what() << "\n\n";
+    }
 
     Matrix<double> tmp;
 
@@ -293,31 +359,6 @@ int main() {
     std::cout << "matrix after operation:\n";
     std::cout << tmp << "\n\n";
 
-    std::cout << "Same operations, but using METHODS..\n";
-    std::cout << "Operation: tmp = math_matrix.addElem(2.5);\n";
-    tmp = math_matrix.addElem(2.5);
-    std::cout << "matrix after operation:\n";
-    std::cout << tmp << "\n\n";
-
-    std::cout << "Operation: tmp = math_matrix.subElem(2.5);\n";
-    tmp = math_matrix.subElem(2.5);
-    std::cout << "matrix after operation:\n";
-    std::cout << tmp << "\n\n";
-
-    std::cout << "Operation: tmp = math_matrix.mulElem(2.5);\n";
-    tmp = math_matrix.mulElem(2.5);
-    std::cout << "matrix after operation:\n";
-    std::cout << tmp << "\n\n";
-
-    std::cout << "Operation: tmp = math_matrix.divElem(2.5);\n";
-    tmp = math_matrix.divElem(2.5);
-    std::cout << "matrix after operation:\n";
-    std::cout << tmp << "\n\n";
-
-    std::cout << "Negative matrix: \n"
-              << -math_matrix << "\nand one more time with METHOD (neg):\n"
-              << math_matrix.neg() << '\n\n';
-
     Matrix<double> det_matrix = {{38, 382, 21, 9}, {21, 1, 9, 11}, {118, 5, 85, 2}, {10, 8, 22, 13}};
     std::cout << "\n\ndet_matrix:\n"
               << det_matrix << "\n\n";
@@ -334,25 +375,17 @@ int main() {
 
     std::cout << "Matrix multiplication check: \n";
     Matrix<double> res;
-    Matrix<double> m1 = {{1}, {2}, {3}}, m2 = {{1, 2}};
+    Matrix<double> m_mul1 = {{1}, {2}, {3}}, m_mul2 = {{1, 2}};
     std::cout << "Operation: m1 * m2 (m1 = { { 1 }, { 2 }, { 3 } }, m2 = { { 1, 2 } })\n";
-    res = m1 * m2;
-    std::cout << "Result:\n"
-              << res << "\n\n";
-    std::cout << "*with method* Operation: m1 * m2 (m1 = { { 1 }, { 2 }, { 3 } }, m2 = { { 1, 2 } })\n";
-    res = m1.mulMatrix(m2);
+    res = m_mul1 * m_mul2;
     std::cout << "Result:\n"
               << res << "\n\n";
 
     std::cout << "Matrix division check: \n";
-    Matrix<double> m3 = {{1, 2}, {3, 4}};
-    Matrix<double> m4 = {{1, 2}, {3, 4}};
+    Matrix<double> m_div1 = {{1, 2}, {3, 4}};
+    Matrix<double> m_div2 = {{1, 2}, {3, 4}};
     std::cout << "Operation: m3 / m4 (m4 = m3, sizes: 2x2, code line: " << __LINE__ << ")\n";
-    res = m3 / m4;
-    std::cout << "Result:\n"
-              << res << "\n\n";
-    std::cout << "*with method* Operation: m3 / m4 (m4 = m3, sizes: 2x2, code line: " << __LINE__ << ")\n";
-    res = m3.divMatrix(m4);
+    res = m_div1 / m_div2;
     std::cout << "Result:\n"
               << res << "\n\n";
 
@@ -371,6 +404,32 @@ int main() {
     res = scalar2 / m6;
     std::cout << "Result:\n"
               << res << "\n\n";
+
+    std::cout << "Multiply by element int and double matrices\n";
+    Matrix<double> mbe1({{2.5, 3.0}, {3.5, 4.0}});
+    std::cout << "First:\n"
+              << mbe1 << "\n";
+    Matrix<int> mbe2({{1, 2}, {3, 4}});
+    std::cout << "Second:\n"
+              << mbe2 << "\n";
+
+    Matrix<double> result = mbe1.mulByElement(mbe2);
+
+    std::cout << "Result:\n"
+              << result << "\n\n";
+
+    std::cout << "Divide by element int and double matrices\n";
+    Matrix<double> dbe1({{2.5, 3.0}, {3.5, 4.0}});
+    std::cout << "First:\n"
+              << dbe1 << "\n";
+    Matrix<int> dbe2({{1, 2}, {3, 4}});
+    std::cout << "Second:\n"
+              << dbe2 << "\n";
+
+    result = dbe1.divByElement(dbe2);
+
+    std::cout << "Result:\n"
+              << result << "\n\n";
 
     std::cout << "MATH OPERATIONS SECTION END\n\n";
 // MATH OPERATIONS -------------------------------------------
