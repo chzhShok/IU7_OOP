@@ -3,13 +3,13 @@
 
 #include "matrix.h"
 
-//#define CONSTRUCTOR
-//#define INSERT_DELETE_RESIZE
-//#define GET
-//#define ITERATORS
-//#define CONST_ITERATORS
+#define CONSTRUCTOR
+#define INSERT_DELETE_RESIZE
+#define GET
+#define ITERATORS
+#define CONST_ITERATORS
 #define MATH_OPERATIONS
-//#define ERRORS
+#define ERRORS
 
 struct Decimal {
     int value;
@@ -165,22 +165,6 @@ int main() {
     c_insert.resize(c_insert.getRows() - 2, c_insert.getCols() - 1);
     std::cout << c_insert << "\n\n";
 
-    // TODO
-    /*
-    struct NoDefault {
-        int value;
-
-        explicit NoDefault(int val) : value(val) {}
-        NoDefault() = delete;
-        NoDefault(const NoDefault &) = default;
-        bool operator==(const NoDefault &other) const = default;
-    };
-
-    Matrix<NoDefault> m(2, 2, NoDefault{42});
-
-    m.resize(3, 3, NoDefault{100});
-     */
-
     std::cout << "Check of transpose method on matrix c_insert (but first - resize (+ 2 rows)):\n";
     std::cout << "Command: c_insert.resizeRows(c_insert.getRows() + 2, 32.10);\n";
     c_insert.resizeRows(c_insert.getRows() + 2, 32.10);
@@ -264,11 +248,6 @@ int main() {
 
     std::cout << "Create const matrix = {{'1', '2', '3'}, {'4', '5', '6'}}\n";
     const Matrix<char> const_m = {{'1', '2', '3'}, {'4', '5', '6'}};
-
-    std::cout << "Range-based for cycle for const matrix:\n";
-    for (const auto &elem: const_m)
-        std::cout << elem << "; ";
-    std::cout << "\n\n";
 
     std::cout << "Insert in c_m_tmp matrix from const matrix:\n";
     Matrix<char> c_m_tmp{
@@ -414,9 +393,9 @@ int main() {
               << mbe2 << "\n";
 
     Matrix<double> result = mbe1.mulByElement(mbe2);
-
     std::cout << "Result:\n"
               << result << "\n\n";
+
 
     std::cout << "Divide by element int and double matrices\n";
     Matrix<double> dbe1({{2.5, 3.0}, {3.5, 4.0}});
@@ -427,7 +406,6 @@ int main() {
               << dbe2 << "\n";
 
     result = dbe1.divByElement(dbe2);
-
     std::cout << "Result:\n"
               << result << "\n\n";
 

@@ -44,20 +44,20 @@ public:
     Matrix &operator=(std::initializer_list<std::initializer_list<T>> init_list);
 
     // математика с матрицами
-    template<MatrixArithmetic<T> U>
-    Matrix operator+(const Matrix<U> &matrix) const;
+    template<typename U>
+    decltype(auto) operator+(const Matrix<U> &matrix) const;
 
-    template<MatrixArithmetic<T> U>
-    Matrix operator-(const Matrix<U> &matrix) const;
+    template<typename U>
+    decltype(auto) operator-(const Matrix<U> &matrix) const;
 
-    template<MatrixArithmetic<T> U>
-    Matrix operator*(const Matrix<U> &matrix) const;
+    template<typename U>
+    decltype(auto) operator*(const Matrix<U> &matrix) const;
 
     template<MatrixArithmetic<T> U>
     Matrix<T> mulByElement(const Matrix<U> &matrix) const;
 
-    template<MatrixArithmetic<T> U>
-    Matrix operator/(const Matrix<U> &matrix) const;
+    template<typename U>
+    decltype(auto) operator/(const Matrix<U> &matrix) const;
 
     template<MatrixArithmetic<T> U>
     Matrix<T> divByElement(const Matrix<U> &matrix) const;
@@ -143,17 +143,17 @@ public:
     bool operator!=(const Matrix &matrix) const;
 
 protected:
-    template<MatrixArithmetic<T> U>
-    Matrix addMatrix(const Matrix<U> &matrix) const;
+    template<typename U>
+    decltype(auto) addMatrix(const Matrix<U> &matrix) const;
 
-    template<MatrixArithmetic<T> U>
-    Matrix subMatrix(const Matrix<U> &matrix) const;
+    template<typename U>
+    decltype(auto) subMatrix(const Matrix<U> &matrix) const;
 
-    template<MatrixArithmetic<T> U>
-    Matrix mulMatrix(const Matrix<U> &matrix) const;
+    template<typename U>
+    decltype(auto) mulMatrix(const Matrix<U> &matrix) const;
 
-    template<MatrixArithmetic<T> U>
-    Matrix divMatrix(const Matrix<U> &matrix) const;
+    template<typename U>
+    decltype(auto) divMatrix(const Matrix<U> &matrix) const;
 
     template<MatrixArithmetic<T> U>
     Matrix &addEqMatrix(const Matrix<U> &matrix);

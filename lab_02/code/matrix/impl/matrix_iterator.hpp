@@ -10,17 +10,6 @@ Iterator<T> Matrix<T>::end() {
     return Iterator<T>(*this, cols * rows);
 }
 
-//template<MatrixElement T>
-//ConstIterator<T> Matrix<T>::begin() const {
-//    return ConstIterator<T>(*this, 0);
-//}
-//
-//template<MatrixElement T>
-//ConstIterator<T> Matrix<T>::end() const {
-//    return ConstIterator<T>(*this, cols * rows);
-//}
-
-
 template<MatrixElement T>
 ConstIterator<T> Matrix<T>::cbegin() const {
     return ConstIterator<T>(*this, 0);

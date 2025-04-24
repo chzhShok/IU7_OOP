@@ -50,20 +50,20 @@ Matrix<T> &Matrix<T>::operator=(std::initializer_list<std::initializer_list<T>> 
 }
 
 template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> Matrix<T>::operator+(const Matrix<U> &matrix) const {
+template<typename U>
+decltype(auto) Matrix<T>::operator+(const Matrix<U> &matrix) const {
     return addMatrix(matrix);
 }
 
 template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> Matrix<T>::operator-(const Matrix<U> &matrix) const {
+template<typename U>
+decltype(auto) Matrix<T>::operator-(const Matrix<U> &matrix) const {
     return subMatrix(matrix);
 }
 
 template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> Matrix<T>::operator*(const Matrix<U> &matrix) const {
+template<typename U>
+decltype(auto) Matrix<T>::operator*(const Matrix<U> &matrix) const {
     return mulMatrix(matrix);
 }
 
@@ -81,8 +81,8 @@ Matrix<T> Matrix<T>::mulByElement(const Matrix<U> &matrix) const {
 }
 
 template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> Matrix<T>::operator/(const Matrix<U> &matrix) const {
+template<typename U>
+decltype(auto) Matrix<T>::operator/(const Matrix<U> &matrix) const {
     return divMatrix(matrix);
 }
 
@@ -106,8 +106,8 @@ Matrix<T> Matrix<T>::divByElement(const Matrix<U> &matrix) const {
 }
 
 template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> Matrix<T>::addMatrix(const Matrix<U> &matrix) const {
+template<typename U>
+decltype(auto) Matrix<T>::addMatrix(const Matrix<U> &matrix) const {
     checkSizes(matrix);
     Matrix<T> result(*this);
     result += matrix;
@@ -115,8 +115,8 @@ Matrix<T> Matrix<T>::addMatrix(const Matrix<U> &matrix) const {
 }
 
 template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> Matrix<T>::subMatrix(const Matrix<U> &matrix) const {
+template<typename U>
+decltype(auto) Matrix<T>::subMatrix(const Matrix<U> &matrix) const {
     checkSizes(matrix);
     Matrix<T> result(*this);
     result -= matrix;
@@ -124,8 +124,8 @@ Matrix<T> Matrix<T>::subMatrix(const Matrix<U> &matrix) const {
 }
 
 template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> Matrix<T>::mulMatrix(const Matrix<U> &matrix) const {
+template<typename U>
+decltype(auto) Matrix<T>::mulMatrix(const Matrix<U> &matrix) const {
     checkMultSizes(matrix);
     Matrix<T> result(*this);
     result *= matrix;
@@ -133,8 +133,8 @@ Matrix<T> Matrix<T>::mulMatrix(const Matrix<U> &matrix) const {
 }
 
 template<MatrixElement T>
-template<MatrixArithmetic<T> U>
-Matrix<T> Matrix<T>::divMatrix(const Matrix<U> &matrix) const {
+template<typename U>
+decltype(auto) Matrix<T>::divMatrix(const Matrix<U> &matrix) const {
     Matrix<T> result(*this);
     result /= matrix;
     return result;
