@@ -1,7 +1,7 @@
 #pragma once
 
-#define COLORBUTTONACTIVE "green"
-#define COLORBUTTONINACTIVE "white"
+#define COLORBUTTONINACTIVE "lightgray"
+#define COLORBUTTONACTIVE "red"
 #define COLORTEXTBUTTONINACTIVE "black"
 
 #define FLOORS 12

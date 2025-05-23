@@ -39,3 +39,12 @@ void Button::unpressSlot() {
     _state = INACTIVE;
     setDisabled(false);
 }
+
+void Button::highlightCurrentFloor(bool is_current) {
+    if (is_current)
+        setStyleSheet("background-color: gray; color: black");
+    else if (_state == INACTIVE)
+        setStyleSheet(QString("background-color:") + COLORBUTTONINACTIVE + QString("; color:") + COLORTEXTBUTTONINACTIVE);
+
+    update();
+}

@@ -15,6 +15,7 @@ public:
     ~Button() override = default;
 
     void setFloor(int floor);
+    void highlightCurrentFloor(bool is_current);
 
 signals:
     void pressSignal(bool, int);

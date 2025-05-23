@@ -51,6 +51,11 @@ Controller::Controller(QWidget *parent) : QWidget(parent) {
         QObject::connect(new_button.get(), &Button::pressSignal, this, &Controller::newTarget);
     }
 
+    if (START_FLOOR > 0 && START_FLOOR <= FLOORS) {
+        _buttons_floor[START_FLOOR - 1]->highlightCurrentFloor(true);
+        _buttons_lift[START_FLOOR - 1]->highlightCurrentFloor(true);
+    }
+
     QObject::connect(this, &Controller::reachFloorSignal, this, &Controller::reachFloor);
 }
 
@@ -126,6 +131,18 @@ void Controller::reachFloor() {
 
     qDebug() << "[^] Лифт приехал на этаж № " << _targetFloor;
 
+    if (_curFloor > 0 && _curFloor <= FLOORS) {
+        _buttons_floor[_curFloor - 1]->highlightCurrentFloor(false);
+        _buttons_lift[_curFloor - 1]->highlightCurrentFloor(false);
+    }
+
+    _curFloor = _targetFloor;
+
+    if (_curFloor > 0 && _curFloor <= FLOORS) {
+        _buttons_floor[_curFloor - 1]->highlightCurrentFloor(true);
+        _buttons_lift[_curFloor - 1]->highlightCurrentFloor(true);
+    }
+
     emit _buttons_floor[_targetFloor - 1]->unpressSignal();
     emit _buttons_lift[_targetFloor - 1]->unpressSignal();
 
@@ -138,7 +155,16 @@ void Controller::reachFloor() {
 }
 
 void Controller::_updateFloor() {
-    _curFloor += _direction;
+    if (_curFloor > 0 && _curFloor <= FLOORS) {
+        _buttons_floor[_curFloor - 1]->highlightCurrentFloor(false);
+        _buttons_lift[_curFloor - 1]->highlightCurrentFloor(false);
+    }
 
+    _curFloor += _direction;
     qDebug() << "[...] Лифт едет на этаж № " << _curFloor;
+
+    if (_curFloor > 0 && _curFloor <= FLOORS) {
+        _buttons_floor[_curFloor - 1]->highlightCurrentFloor(true);
+        _buttons_lift[_curFloor - 1]->highlightCurrentFloor(true);
+    }
 }
