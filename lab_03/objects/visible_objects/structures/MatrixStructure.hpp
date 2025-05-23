@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Matrix.h"
 #include "ModelStructure.hpp"
-#include "SquareMatrix.hpp"
 
 class MatrixStructure : public ModelStructure {
 public:
@@ -10,7 +10,7 @@ public:
 
     const std::vector<Vertex> &getVertices() const override;
     const std::vector<Edge> &getEdges() const override;
-    const Vertex getCenter() const override;
+    const Vertex &getCenter() const override;
 
     void addVertex(const Vertex &vertex) override;
     void addEdge(const Edge &edge) override;
@@ -22,5 +22,5 @@ private:
     Vertex _center;
 
     std::vector<Vertex> _vertices;
-    SquareMatrix<int> _edgeMatrix;
+    Matrix<int> _edgeMatrix;
 };

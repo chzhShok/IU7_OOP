@@ -10,8 +10,8 @@ public:
     explicit Composite(const std::vector<std::shared_ptr<BaseObject>> &vector);
     virtual ~Composite() = default;
 
-    virtual void add(const std::shared_ptr<BaseObject> &object) override;
-    virtual void remove(const iterator &iterator) override;
+    virtual void add(const std::shared_ptr<BaseObject> &object);
+    virtual void remove(const iterator &iterator);
     virtual void transform() override;
 
     virtual iterator begin() override;

@@ -12,8 +12,8 @@ public:
     BaseObject();
     virtual ~BaseObject() = 0;
 
-    virtual void add(const std::shared_ptr<BaseObject> &object) = 0;
-    virtual void remove(const iterator &) = 0;
+//    virtual void add(const std::shared_ptr<BaseObject> &object) = 0;
+//    virtual void remove(const iterator &) = 0;
     virtual void transform() = 0;
 
     virtual iterator begin() { return iterator(); };
@@ -23,7 +23,9 @@ public:
     virtual bool isComposite() { return false; };
 
     virtual Vertex getCenter() const = 0;
+    virtual void updateCenter() {};
     virtual std::size_t getId() { return _id; }
+    virtual std::shared_ptr<BaseObject> clone() const { return nullptr; };
 
 protected:
     std::size_t _id;
