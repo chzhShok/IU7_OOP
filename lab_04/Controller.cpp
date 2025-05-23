@@ -68,11 +68,10 @@ void Controller::setupInitialFloorHighlight() {
 void Controller::decideTarget(bool is_new_press, int floor) {
     _state = BUSY;
 
-    if (is_new_press) {
-        handleNewButtonPress(floor);
-    } else {
-        handleNextTarget();
-    }
+    if (is_new_press)
+        _handleNewButtonPress(floor);
+    else
+        _handleNextTarget();
 }
 
 void Controller::_handleNewButtonPress(int floor) {
