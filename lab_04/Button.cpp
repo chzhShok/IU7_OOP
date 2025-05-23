@@ -33,7 +33,7 @@ void Button::pressSlot() {
 void Button::unpressSlot() {
     if (_state == INACTIVE) return;
 
-    setStyleSheet((QString("background-color:") + COLORBUTTONINACTIVE + QString("; color:") + COLORTEXTBUTTONINACTIVE));
+    setStyleSheet("background-color: gray; color: black");
     update();
 
     _state = INACTIVE;

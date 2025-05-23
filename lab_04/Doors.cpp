@@ -13,7 +13,7 @@ void Doors::startOpening() {
         return;
 
     _state = OPENING;
-    qDebug() << "Двери открываются";
+    qDebug() << "--- Двери открываются ---";
     _openTimer.start(DOOR_TIME);
 }
 
@@ -22,7 +22,7 @@ void Doors::open() {
         return;
 
     _state = OPEN;
-    qDebug() << "[!] Двери открыты!";
+    qDebug() << "[!] Двери открыты ---";
     _waitTimer.start(WAIT_TIME);
 }
 
@@ -31,7 +31,7 @@ void Doors::startClosing() {
         return;
 
     _state = CLOSING;
-    qDebug() << "Двери закрываются";
+    qDebug() << "--- Двери закрываются ---";
     _closeTimer.start(DOOR_TIME);
 }
 
@@ -40,6 +40,6 @@ void Doors::close() {
         return;
 
     _state = CLOSED;
-    qDebug() << "[!] Двери закрылись!";
+    qDebug() << "[!] Двери закрылись ---";
     emit doorClosed();
 }

@@ -7,8 +7,8 @@ Cabin::Cabin(QObject *parent) : QObject(parent) {
     _state = STOP;
 
     QObject::connect(this, &Cabin::openDoors, &_doors, &Doors::startOpening);
-    QObject::connect(&_moveTimer, &QTimer::timeout, this, &Cabin::free);
-    QObject::connect(&_doors, &Doors::doorClosed, this, &Cabin::free);
+    QObject::connect(&_moveTimer, &QTimer::timeout, this, &Cabin::freeCabin);
+    QObject::connect(&_doors, &Doors::doorClosed, this, &Cabin::freeCabin);
 }
 
 void Cabin::stopCabin() {
@@ -24,7 +24,7 @@ void Cabin::moveCabin() {
     }
 }
 
-void Cabin::free() {
+void Cabin::freeCabin() {
     if (_state == STOP)
         return;
 

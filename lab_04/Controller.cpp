@@ -1,86 +1,104 @@
 #include "Controller.hpp"
 
 Controller::Controller(QWidget *parent) : QWidget(parent) {
-    _layout = std::make_unique<QVBoxLayout>();
-    setLayout(this->_layout.get());
-
-    auto new_button = std::make_shared<Button>();
-    new_button->setDisabled(true);
-    new_button->setStyleSheet("background-color:blue; color:white");
-    new_button->setFloor(FLOORS + 1);
-    new_button->setText("Floor buttons");
-
-    this->_buttons_floor.insert(this->_buttons_floor.begin(), new_button);
-    _layout->addWidget(dynamic_cast<QPushButton *>(new_button.get()));
-
-    for (size_t i = 0; i < FLOORS; i++) {
-        auto new_button = std::make_shared<Button>();
-        new_button->setFloor(FLOORS - i);
-        new_button->setText(QString::number(FLOORS - i));
-        new_button->setStyleSheet(QString("background-color:") + COLORBUTTONINACTIVE + QString("; color:") + COLORTEXTBUTTONINACTIVE);
-
-        _buttons_floor.insert(_buttons_floor.begin(), new_button);
-        _layout->addWidget(dynamic_cast<QPushButton *>(new_button.get()));
-
-        _is_visit.push_back(false);
-
-        QObject::connect(new_button.get(), &Button::pressSignal, this, &Controller::newTarget);
-    }
-
-    auto lift_button = std::make_shared<Button>();
-    lift_button->setDisabled(true);
-    lift_button->setStyleSheet("background-color:blue; color:white");
-    lift_button->setFloor(2 * FLOORS + 2);
-    lift_button->setText("Lift buttons");
-
-    this->_buttons_lift.insert(_buttons_lift.begin(), lift_button);
-    _layout->addWidget(dynamic_cast<QPushButton *>(lift_button.get()));
-
-
-    for (size_t i = 0; i < FLOORS; i++) {
-        auto new_button = std::make_shared<Button>();
-        new_button->setFloor(FLOORS - i);
-        new_button->setText(QString::number(FLOORS - i));
-        new_button->setStyleSheet(QString("background-color:") + COLORBUTTONINACTIVE + QString("; color:") + COLORTEXTBUTTONINACTIVE);
-
-        _buttons_lift.insert(_buttons_lift.begin(), new_button);
-        _layout->addWidget(dynamic_cast<QPushButton *>(new_button.get()));
-
-        _is_visit.push_back(false);
-
-        QObject::connect(new_button.get(), &Button::pressSignal, this, &Controller::newTarget);
-    }
-
-    if (START_FLOOR > 0 && START_FLOOR <= FLOORS) {
-        _buttons_floor[START_FLOOR - 1]->highlightCurrentFloor(true);
-        _buttons_lift[START_FLOOR - 1]->highlightCurrentFloor(true);
-    }
+    setupLayout();
+    createFloorButtonsSection();
+    createLiftButtonsSection();
+    setupInitialFloorHighlight();
 
     QObject::connect(this, &Controller::reachFloorSignal, this, &Controller::reachFloor);
 }
 
-void Controller::newTarget(bool got_new, int floor) {
+void Controller::setupLayout() {
+    _layout = std::make_unique<QVBoxLayout>();
+    setLayout(_layout.get());
+}
+
+void Controller::createFloorButtonsSection() {
+    addSectionHeader("Floor buttons", FLOORS + 1, _buttons_floor);
+
+    for (size_t i = 0; i < FLOORS; i++) {
+        int floor_number = FLOORS - i;
+        auto button = createFloorButton(floor_number);
+        _buttons_floor.insert(_buttons_floor.begin(), button);
+        _is_visit.push_back(false);
+    }
+}
+
+void Controller::createLiftButtonsSection() {
+    addSectionHeader("Lift buttons", 2 * FLOORS + 2, _buttons_lift);
+
+    for (size_t i = 0; i < FLOORS; i++) {
+        int floor_number = FLOORS - i;
+        auto button = createFloorButton(floor_number);
+        _buttons_lift.insert(_buttons_lift.begin(), button);
+    }
+}
+
+void Controller::addSectionHeader(const QString &text, int floor, std::vector<std::shared_ptr<Button>> &buttons) {
+    auto header_button = std::make_shared<Button>();
+    header_button->setDisabled(true);
+    header_button->setStyleSheet("background-color:blue; color:white");
+    header_button->setFloor(floor);
+    header_button->setText(text);
+
+    buttons.insert(buttons.begin(), header_button);
+    _layout->addWidget(dynamic_cast<QPushButton *>(header_button.get()));
+}
+
+std::shared_ptr<Button> Controller::createFloorButton(int floor_number) {
+    auto button = std::make_shared<Button>();
+    button->setFloor(floor_number);
+    button->setText(QString::number(floor_number));
+    button->setStyleSheet(QString("background-color:") + COLORBUTTONINACTIVE + QString("; color:") + COLORTEXTBUTTONINACTIVE);
+
+    _layout->addWidget(dynamic_cast<QPushButton *>(button.get()));
+    QObject::connect(button.get(), &Button::pressSignal, this, &Controller::decideTarget);
+
+    return button;
+}
+
+void Controller::setupInitialFloorHighlight() {
+    if (START_FLOOR > 0 && START_FLOOR <= FLOORS) {
+        _buttons_floor[START_FLOOR - 1]->highlightCurrentFloor(true);
+        _buttons_lift[START_FLOOR - 1]->highlightCurrentFloor(true);
+    }
+}
+
+void Controller::decideTarget(bool is_new_press, int floor) {
     _state = BUSY;
-    if (got_new) {
-        _is_visit[floor - 1] = true;
 
-        _identifyNewTarget(floor);
-        _targetFloor = floor;
-        _decideDirection();
-        if (_direction == STAY)
-            emit reachFloorSignal();
-        else
-            emit moveCabinSignal();
-    } else if (_identifyNewTarget(floor)) {
-        _targetFloor = floor;
-        _decideDirection();
+    if (is_new_press) {
+        handleNewButtonPress(floor);
+    } else {
+        handleNextTarget();
+    }
+}
 
-        if (_direction != STAY) {
-            _updateFloor();
-            emit moveCabinSignal();
-        } else {
-            emit reachFloorSignal();
-        }
+void Controller::_handleNewButtonPress(int floor) {
+    _is_visit[floor - 1] = true;
+
+    _identifyNewTarget(floor);
+    _targetFloor = floor;
+
+    _decideDirection();
+
+    emit(_direction == STAY) ? reachFloorSignal() : moveCabinSignal();
+}
+
+void Controller::_handleNextTarget() {
+    int next_floor;
+    if (!_identifyNewTarget(next_floor))
+        return;
+
+    _targetFloor = next_floor;
+    _decideDirection();
+
+    if (_direction != STAY) {
+        _updateFloor();
+        emit moveCabinSignal();
+    } else {
+        emit reachFloorSignal();
     }
 }
 

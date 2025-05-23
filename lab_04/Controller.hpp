@@ -33,10 +33,20 @@ signals:
     void reachFloorSignal();
 
 public slots:
-    void newTarget(bool, int = 1);
+    void decideTarget(bool, int = 1);
     void reachFloor();
 
 private:
+    void setupLayout();
+    void createFloorButtonsSection();
+    void createLiftButtonsSection();
+    void addSectionHeader(const QString &text, int floor, std::vector<std::shared_ptr<Button>> &buttons);
+    std::shared_ptr<Button> createFloorButton(int floor_number);
+    void setupInitialFloorHighlight();
+
+    void _handleNewButtonPress(int floor);
+    void _handleNextTarget();
+
     bool _identifyNewTarget(int &new_target);
     void _decideDirection();
     void _updateFloor();

@@ -25,7 +25,7 @@ signals:
 public slots:
     void stopCabin();
     void moveCabin();
-    void free();
+    void freeCabin();
 
 private:
     cabinState _state;
