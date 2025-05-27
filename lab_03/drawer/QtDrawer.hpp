@@ -1,18 +1,15 @@
 #pragma once
 
-#include <QGraphicsScene>
-
 #include "BaseDrawer.hpp"
-
+#include <QGraphicsScene>
 
 class QtDrawer : public BaseDrawer {
 public:
     QtDrawer() = delete;
-    explicit QtDrawer(QGraphicsScene *scene);
-    QtDrawer(const QtDrawer &drawer);
-
-    void drawLine(const Vertex &vertex1, const Vertex &vertex2) override;
-    void clearScene() override;
+    QtDrawer(QGraphicsScene *scene);
+    virtual ~QtDrawer() = default;
+    virtual void drawLine(const Vertex &p1, const Vertex &p2);
+    virtual void clear();
 
 private:
     QGraphicsScene *_scene;

@@ -2,9 +2,11 @@
 
 #include <QApplication>
 
-int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.showMaximized();
-    return a.exec();
+int main(int argc, char **argv) {
+    QApplication app(argc, argv);
+
+    MyMainWindow window;
+    window.show();
+
+    return app.exec();
 }

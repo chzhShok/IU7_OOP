@@ -1,13 +1,10 @@
-#ifndef FACADE_H
-#define FACADE_H
+#pragma once
 
 #include "BaseCommand.hpp"
-#include "DrawManager.hpp"
+#include "DrawManager.h"
 #include "LoadManager.hpp"
 #include "SceneManager.hpp"
 #include "TransformManager.hpp"
-
-#include <memory>
 
 class Facade {
 public:
@@ -17,10 +14,8 @@ public:
     void execute(BaseCommand &command);
 
 private:
-    std::shared_ptr<DrawManager> _drawManager;
-    std::shared_ptr<LoadManager> _loadManager;
     std::shared_ptr<SceneManager> _sceneManager;
+    std::shared_ptr<LoadManager> _loadManager;
     std::shared_ptr<TransformManager> _transformManager;
+    std::shared_ptr<DrawManager> _drawManager;
 };
-
-#endif//FACADE_H

@@ -1,27 +1,27 @@
 #pragma once
 
-#include "BaseObject.hpp"
+#include <memory>
 
+#include "BaseObject.hpp"
+#include "Visitor.hpp"
+#include "Vertex.hpp"
 
 class Composite : public BaseObject {
 public:
     Composite() = default;
-    explicit Composite(std::shared_ptr<BaseObject> &object);
-    explicit Composite(const std::vector<std::shared_ptr<BaseObject>> &vector);
+    Composite(std::vector<std::shared_ptr<BaseObject>> objects);
+
     virtual ~Composite() = default;
+    virtual std::shared_ptr<BaseObject> clone() const;
+    virtual void add(const std::shared_ptr<BaseObject> object);
+    virtual void remove(const iterator &it);
+    virtual void accept(std::shared_ptr<Visitor> v);
+    virtual bool isComposite() const;
+    virtual bool isVisible() const;
+    virtual Vertex getCenter() const;
+    virtual iterator begin();
+    virtual iterator end();
 
-    virtual void add(const std::shared_ptr<BaseObject> &object);
-    virtual void remove(const iterator &iterator);
-    virtual void transform() override;
-
-    virtual iterator begin() override;
-    virtual iterator end() override;
-
-    virtual bool isVisible() override;
-    virtual bool isComposite() override;
-
-    virtual Vertex getCenter() const override;
-
-private:
+protected:
     std::vector<std::shared_ptr<BaseObject>> _objects;
 };

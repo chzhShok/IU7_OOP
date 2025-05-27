@@ -1,13 +1,11 @@
 #pragma once
-
 #include "Vertex.hpp"
-
 
 class BaseDrawer {
 public:
     BaseDrawer() = default;
-    virtual ~BaseDrawer() = default;
+    virtual ~BaseDrawer() = 0;
 
-    virtual void drawLine(const Vertex &vertex1, const Vertex &vertex2) = 0;
-    virtual void clearScene() = 0;
+    virtual void drawLine(const Vertex &p1, const Vertex &p2) = 0;
+    virtual void clear() = 0;
 };

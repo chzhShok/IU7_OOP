@@ -1,385 +1,249 @@
-#include <QDebug>
-#include <cmath>
-
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
-    ui->setupUi(this);
-    setupScene();
+#include <QMessageBox>
+#include <QPushButton>
+#include <cmath>
 
-    _facade = std::make_shared<Facade>(Facade());
+#include "AddCameraCommand.hpp"
+#include "CompositeObjectCommand.hpp"
+#include "CsvLoadCommandDecorator.hpp"
+#include "DeleteObjectCommand.hpp"
+#include "DrawSceneQtCommand.hpp"
+#include "Exception.hpp"
+#include "GetCameraIDsSceneCommand.hpp"
+#include "GetObjectIDsSceneCommand.hpp"
+#include "ListLoadCommand.hpp"
+#include "MatrixLoadCommand.hpp"
+#include "MoveObjectCommand.hpp"
+#include "RemoveCameraCommand.hpp"
+#include "RotateObjectCommand.hpp"
+#include "ScaleObjectCommand.hpp"
+#include "SetCameraCommand.hpp"
+#include "TxtLoadCommandDecorator.hpp"
+#include "Vertex.hpp"
+
+double degToRad(double angle) {
+    return angle / 180.0 * M_PI;
 }
 
-MainWindow::~MainWindow() {
+MyMainWindow::MyMainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+    ui->setupUi(this);
+    ui->canvas->setScene(new QGraphicsScene);
+    ui->canvas->scene()->setSceneRect(ui->canvas->sceneRect());
+    ui->canvas->setBackgroundBrush(Qt::white);
+
+    ui->structureComboBox->addItem("Список", 0);
+    ui->structureComboBox->addItem("Матрица", 1);
+    ui->objectsList->setSelectionMode(QAbstractItemView::MultiSelection);
+}
+
+MyMainWindow::~MyMainWindow() {
     delete ui;
 }
 
-void MainWindow::setupScene() {
-    _scene = new QGraphicsScene(this);
-
-    ui->graphicsView->setScene(_scene);
-    ui->graphicsView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-
-    auto cont = ui->graphicsView->contentsRect();
-    _scene->setSceneRect(0, 0, cont.width(), cont.height());
-    _camInd = 1;
-
-    auto solution(new DrawerFactorySolution<QtDrawerFactory, QGraphicsScene>());
-    _drawer = solution->createDrawer(_scene);
+bool endsWith(const std::string &str, const std::string &suffix) {
+    if (str.length() >= suffix.length())
+        return (0 == str.compare(str.length() - suffix.length(), suffix.length(), suffix));
+    else
+        return false;
 }
 
-void MainWindow::updateScene() {
-    ClearScene clear_cmd(_drawer);
-    _facade->execute(clear_cmd);
+//TODO
+void MyMainWindow::on_loadButton_clicked() {
+    std::string fileName = ui->filePath->text().toStdString();
 
-    DrawScene draw_cmd(_drawer);
-    _facade->execute(draw_cmd);
-}
+    std::shared_ptr<BaseLoadCommand> command;
 
-void MainWindow::checkCamExist() {
-    if (!_cameras.size()) {
-        std::string msg = "No camera found.";
-        throw CameraException(msg);
-    }
-}
+    if (ui->structureComboBox->currentText() == "Список")
+        command = std::make_shared<ListLoadCommand>();
+    else
+        command = std::make_shared<MatrixLoadCommand>();
 
-void MainWindow::checkModelsExist() {
-    if (!_models.size()) {
-        std::string msg = "No models found.";
-        throw ModelException(msg);
-    }
-}
-
-void MainWindow::checkCamDelete() {
-    if (_cameras.size() <= 1 && _models.size()) {
-        std::string msg = "Can not delete the last camera with the loaded models";
-        throw CameraException(msg);
-    }
-}
-
-void MainWindow::on_addCameraBtn_clicked() {
-    auto cont = ui->graphicsView->contentsRect();
-
-    auto id = std::make_shared<size_t>(0);
-    Vertex location(cont.width() / 2.0, cont.height() / 2.0, 0.0);
-    AddCamera addCMD(id, location);
-
-    _facade->execute(addCMD);
-    _cameras.push_back(*id);
-
-    updateScene();
-
-    auto cam = ui->cameraCB;
-
-    std::string camName = std::string("cam") + std::to_string(_camInd++);
-    cam->addItem(QString(camName.data()));
-
-    ui->cameraCB->setCurrentIndex(ui->cameraCB->count() - 1);
-}
-
-void MainWindow::on_loadModelBtn_clicked() {
-    try {
-        checkCamExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Добавьте камеру!");
-        return;
-    }
-
-    auto file = QFileDialog::getOpenFileName(nullptr, "Загрузка модели", "../lab_03/data");
-
-    if (file.isNull())
-        return;
-
-    auto id = std::make_shared<size_t>(0);
-    std::string fileName = file.toStdString();
-
-    LoadModel cmd(id, fileName);
+    std::shared_ptr<BaseCommand> decorator;
+    if (endsWith(fileName, ".csv"))
+        decorator = std::make_shared<CsvLoadCommandDecorator>(*command, fileName);
+    else
+        decorator = std::make_shared<TxtLoadCommandDecorator>(*command, fileName);
 
     try {
-        _facade->execute(cmd);
-    } catch (const BaseException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Ошибка при загрузке файла!");
+        _facade.execute(*decorator);
+    } catch (BaseException &exc) {
+        QMessageBox::critical(nullptr, "Ошибка", exc.what());
         return;
     }
 
-    _models.push_back(*id);
-    updateScene();
-    ui->modelsCB->addItem(QFileInfo(file.toUtf8().data()).fileName());
-    ui->modelsCB->setCurrentIndex(ui->modelsCB->count() - 1);
+    drawScene();
+    updateObjectList();
 }
 
-void MainWindow::on_deleteModelBtn_clicked() {
-    try {
-        checkModelsExist();
-    } catch (const ModelException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет загруженных моделей!");
-        return;
-    }
+//TODO
+void MyMainWindow::on_addCameraButton_clicked() {
+    double x = ui->xCameraSpin->value();
+    double y = ui->yCameraSpin->value();
+    double z = ui->zCameraSpin->value();
 
-    std::size_t id = _models.at(ui->modelsCB->currentIndex());
-    DeleteModel cmd(id);
-    _facade->execute(cmd);
+    Vertex pos(x, y, z);
+    AddCameraCommand command(pos);
 
-    _models.erase(_models.begin() + ui->modelsCB->currentIndex());
-    ui->modelsCB->removeItem(ui->modelsCB->currentIndex());
+    _facade.execute(command);
 
-    updateScene();
+    updateCameraList();
+    updateObjectList();
 }
 
-void MainWindow::on_deleteModelsBtn_clicked() {
-    try {
-        checkModelsExist();
-    } catch (const ModelException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет загруженных моделей!");
+//TODO
+void MyMainWindow::on_setCameraButton_clicked() {
+    auto cams = getSelectedCameraIds();
+    if (cams.size() != 1) {
+        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать ровно одну камеру.");
         return;
     }
 
-    for (int i = ui->modelsCB->count() - 1; i >= 0; --i) {
-        std::size_t id = _models.at(i);
-        DeleteModel cmd(id);
-        _facade->execute(cmd);
-
-        _models.erase(_models.begin() + i);
-        ui->modelsCB->removeItem(i);
-    }
-
-    updateScene();
+    SetCameraCommand command(cams[0]);
+    _facade.execute(command);
+    drawScene();
 }
 
+void MyMainWindow::updateCameraList() {
+    ui->cameraList->clear();
 
-void MainWindow::on_cameraCB_currentIndexChanged(int index) {
-    try {
-        checkCamExist();
-    } catch (const CameraException &error) {
-        return;
-    }
+    GetCameraIDsSceneCommand ids;
 
-    std::size_t id = _cameras.at(index);
-    SetCamera cmd(id);
-    _facade->execute(cmd);
+    _facade.execute(ids);
+    std::vector<size_t> cameraIds = ids.getIDs();
 
-    updateScene();
+    for (size_t id: cameraIds)
+        ui->cameraList->addItem(QString::number(id));
 }
 
+void MyMainWindow::updateObjectList() {
+    ui->objectsList->clear();
 
-void MainWindow::on_deleteCameraBtn_clicked() {
-    try {
-        checkCamExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет камер!");
-        return;
-    }
+    GetObjectIDsSceneCommand ids;
 
-    try {
-        checkCamDelete();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Это последняя камера! Для удаления удалите модели!");
-        return;
-    }
+    _facade.execute(ids);
+    std::vector<size_t> objectIds = ids.getIDs();
 
-    std::size_t id = _cameras.at(ui->cameraCB->currentIndex());
-    DeleteCamera cmd(id);
-    _facade->execute(cmd);
-
-    _cameras.erase(_cameras.begin() + ui->cameraCB->currentIndex());
-    ui->cameraCB->removeItem(ui->cameraCB->currentIndex());
-
-    try {
-        checkCamExist();
-    } catch (const CameraException &error) {
-        return;
-    }
-
-    updateScene();
+    for (size_t id: objectIds)
+        ui->objectsList->addItem(QString::number(id));
 }
 
-void MainWindow::on_upBtn_clicked() {
-    try {
-        checkCamExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Не загружено ни одной камеры.");
-        return;
+//TODO
+std::vector<size_t> MyMainWindow::getSelectedObjectIds() {
+    std::vector<size_t> ids;
+    for (int i = 0; i < ui->objectsList->count(); i++) {
+        if (ui->objectsList->item(i)->isSelected()) {
+            ids.push_back(ui->objectsList->item(i)->text().toInt());
+        }
     }
-
-    std::size_t id = _cameras.at(ui->cameraCB->currentIndex());
-    MoveCamera cmd(0, 10, 0, id);
-
-    _facade->execute(cmd);
-    updateScene();
+    return ids;
 }
 
-void MainWindow::on_rigthBtn_clicked() {
-    try {
-        checkCamExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Не загружено ни одной камеры.");
-        return;
+//TODO
+std::vector<size_t> MyMainWindow::getSelectedCameraIds() {
+    std::vector<size_t> ids;
+    for (int i = 0; i < ui->cameraList->count(); i++) {
+        if (ui->cameraList->item(i)->isSelected()) {
+            ids.push_back(ui->cameraList->item(i)->text().toInt());
+        }
     }
-
-    std::size_t id = _cameras.at(ui->cameraCB->currentIndex());
-    MoveCamera cmd(-10, 0, 0, id);
-
-    _facade->execute(cmd);
-    updateScene();
+    return ids;
 }
 
-void MainWindow::on_downBtn_clicked() {
-    try {
-        checkCamExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Не загружено ни одной камеры.");
-        return;
-    }
-
-    std::size_t id = _cameras.at(ui->cameraCB->currentIndex());
-    MoveCamera cmd(0, -10, 0, id);
-
-    _facade->execute(cmd);
-    updateScene();
+//TODO
+void MyMainWindow::drawScene() {
+    ui->canvas->scene()->clear();
+    ui->canvas->scene()->setSceneRect(ui->canvas->sceneRect());
+    DrawSceneQtCommand drawcommand(ui->canvas->scene());
+    _facade.execute(drawcommand);
 }
 
-void MainWindow::on_leftBtn_clicked() {
-    try {
-        checkCamExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Не загружено ни одной камеры.");
+//TODO
+void MyMainWindow::on_moveButton_clicked() {
+    auto objs = getSelectedObjectIds();
+    if (objs.size() == 0) {
+        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
         return;
     }
+    double x = ui->xMoveSpin->value();
+    double y = ui->yMoveSpin->value();
+    double z = ui->zMoveSpin->value();
+    for (auto &id: objs) {
+        MoveObjectCommand command(id, x, y, z);
+        _facade.execute(command);
+    }
 
-    std::size_t id = _cameras.at(ui->cameraCB->currentIndex());
-    MoveCamera cmd(10, 0, 0, id);
-
-    _facade->execute(cmd);
-    updateScene();
+    drawScene();
 }
 
-void MainWindow::on_moveBtn_clicked() {
-    try {
-        checkCamExist();
-        checkModelsExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет камер!");
-        return;
-    } catch (const ModelException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет моделей!");
+//TODO
+void MyMainWindow::on_rotateButton_clicked() {
+    auto objs = getSelectedObjectIds();
+    if (objs.size() == 0) {
+        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
         return;
     }
 
-    MoveModel cmd(
-            ui->dxDSB->value(),
-            ui->dyDSB->value(),
-            ui->dzDSB->value(),
-            _models.at(ui->modelsCB->currentIndex()));
+    double x = degToRad(ui->xRotateSpin->value());
+    double y = degToRad(ui->yRotateSpin->value());
+    double z = degToRad(ui->zRotateSpin->value());
+    for (auto &id: objs) {
+        RotateObjectCommand command(id, x, y, z);
+        _facade.execute(command);
+    }
 
-    _facade->execute(cmd);
-    updateScene();
+    drawScene();
 }
 
-void MainWindow::on_moveAllBtn_clicked() {
-    try {
-        checkCamExist();
-        checkModelsExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет камер!");
-        return;
-    } catch (const ModelException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет моделей!");
+//TODO
+void MyMainWindow::on_scaleButton_clicked() {
+    auto objs = getSelectedObjectIds();
+    if (objs.size() == 0) {
+        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
         return;
     }
+    double x = ui->xScaleSpin->value();
+    double y = ui->yScaleSpin->value();
+    double z = ui->zScaleSpin->value();
+    for (auto &id: objs) {
+        ScaleObjectCommand command(id, x, y, z);
+        _facade.execute(command);
+    }
 
-    MoveModels cmd(
-            ui->dxDSB->value(),
-            ui->dyDSB->value(),
-            ui->dzDSB->value());
-
-    _facade->execute(cmd);
-    updateScene();
+    drawScene();
 }
 
-void MainWindow::on_scaleBtn_clicked() {
-    try {
-        checkCamExist();
-        checkModelsExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет камер!");
-        return;
-    } catch (const ModelException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет моделей!");
+//TODO
+void MyMainWindow::on_deleteSelectedButton_clicked() {
+    auto objs = getSelectedObjectIds();
+    if (objs.size() == 0) {
+        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
         return;
     }
+    for (auto &id: objs) {
+        RemoveCameraCommand command1(id);
+        _facade.execute(command1);
+        DeleteObjectCommand command2(id);
+        _facade.execute(command2);
+    }
 
-    ScaleModel cmd(
-            ui->kxDSB->value(),
-            ui->kyDSB->value(),
-            ui->kzDSB->value(),
-            _models.at(ui->modelsCB->currentIndex()));
-
-    _facade->execute(cmd);
-    updateScene();
+    drawScene();
+    updateObjectList();
+    updateCameraList();
 }
 
-void MainWindow::on_scaleAllBtn_clicked() {
-    try {
-        checkCamExist();
-        checkModelsExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет камер!");
-        return;
-    } catch (const ModelException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет моделей!");
+//TODO
+void MyMainWindow::on_objectsCompositeButton_clicked() {
+    auto objs = getSelectedObjectIds();
+    if (objs.size() == 0) {
+        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
         return;
     }
+    CompositeObjectCommand command(objs);
+    _facade.execute(command);
 
-    ScaleModels cmd(
-            ui->kxDSB->value(),
-            ui->kyDSB->value(),
-            ui->kzDSB->value());
-
-    _facade->execute(cmd);
-    updateScene();
-}
-
-void MainWindow::on_rotateBtn_clicked() {
-    try {
-        checkCamExist();
-        checkModelsExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет камер!");
-        return;
-    } catch (const ModelException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет моделей!");
-        return;
-    }
-
-    RotateModel cmd(
-            ui->oxDSB->value() * M_PI / 180,
-            ui->oyDSB->value() * M_PI / 180,
-            ui->ozDSB->value() * M_PI / 180,
-            _models.at(ui->modelsCB->currentIndex()));
-
-    _facade->execute(cmd);
-    updateScene();
-}
-
-void MainWindow::on_rotateAllBtn_clicked() {
-    try {
-        checkCamExist();
-        checkModelsExist();
-    } catch (const CameraException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет камер!");
-        return;
-    } catch (const ModelException &error) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нет моделей!");
-        return;
-    }
-
-    RotateModels cmd(
-            ui->oxDSB->value() * M_PI / 180,
-            ui->oyDSB->value() * M_PI / 180,
-            ui->ozDSB->value() * M_PI / 180);
-
-    _facade->execute(cmd);
-    updateScene();
+    drawScene();
+    updateObjectList();
+    updateCameraList();
 }

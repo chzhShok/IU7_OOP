@@ -11,133 +11,175 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(.)
-include_directories(objects)
-include_directories(objects/visible_objects)
-include_directories(objects/invisible_objects)
-include_directories(objects/visible_objects/structures)
-include_directories(matrix)
-include_directories(matrix/matrix)
-include_directories(matrix/iterator)
-include_directories(matrix/exception)
-include_directories(matrix/concept)
-include_directories(managers)
-include_directories(concepts)
-include_directories(adapters)
-include_directories(adapters/composite)
-include_directories(adapters/model)
-include_directories(commands)
-include_directories(drawer)
-include_directories(facade)
-include_directories(exceptions)
-include_directories(scene)
-include_directories(load)
-include_directories(load/loader)
-include_directories(load/director)
-include_directories(load/builder)
-include_directories(transform)
-
+# Поиск Qt
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+# Поиск SQLite
+find_package(SQLite3 REQUIRED)
+
+# Включение всех заголовочных файлов через один вызов
+include_directories(
+        builder
+        center
+        command
+        command/camera
+        command/draw
+        command/load
+        command/object
+        command/scene
+        concepts
+        director
+        drawer
+        exception
+        facade
+        manager
+        objects
+        loader
+        scene
+        matrix
+        transform_strategy
+        visitor
+)
+
+# Группировка исходных файлов
 set(PROJECT_SOURCES
+        builder/BaseCarcassModelBuilder.cpp
+        builder/BaseCarcassModelBuilder.hpp
+        builder/LinkListModelBuilder.cpp
+        builder/LinkListModelBuilder.hpp
+        builder/MatrixModelBuilder.cpp
+        builder/MatrixModelBuilder.hpp
+        command/camera/AddCameraCommand.cpp
+        command/camera/AddCameraCommand.hpp
+        command/camera/BaseCameraCommand.cpp
+        command/camera/BaseCameraCommand.hpp
+        command/camera/RemoveCameraCommand.cpp
+        command/camera/RemoveCameraCommand.hpp
+        command/camera/SetCameraCommand.cpp
+        command/camera/SetCameraCommand.hpp
+        command/draw/BaseDrawCommand.cpp
+        command/draw/BaseDrawCommand.hpp
+        command/draw/DrawSceneQtCommand.cpp
+        command/draw/DrawSceneQtCommand.hpp
+        command/load/BaseLoadCommand.cpp
+        command/load/BaseLoadCommand.hpp
+        command/load/BaseLoadCommandDecorator.cpp
+        command/load/BaseLoadCommandDecorator.hpp
+        command/load/ListLoadCommand.cpp
+        command/load/ListLoadCommand.hpp
+        command/load/MatrixLoadCommand.cpp
+        command/load/MatrixLoadCommand.hpp
+        command/load/CsvLoadCommandDecorator.cpp
+        command/load/CsvLoadCommandDecorator.hpp
+        command/load/TxtLoadCommandDecorator.cpp
+        command/load/TxtLoadCommandDecorator.hpp
+        command/object/BaseObjectCommand.cpp
+        command/object/BaseObjectCommand.hpp
+        command/object/CompositeObjectCommand.cpp
+        command/object/CompositeObjectCommand.hpp
+        command/object/DeleteObjectCommand.cpp
+        command/object/DeleteObjectCommand.hpp
+        command/object/RotateObjectCommand.cpp
+        command/object/RotateObjectCommand.hpp
+        command/object/ScaleObjectCommand.cpp
+        command/object/ScaleObjectCommand.hpp
+        command/object/MoveObjectCommand.cpp
+        command/object/MoveObjectCommand.hpp
+        command/scene/BaseSceneCommand.cpp
+        command/scene/BaseSceneCommand.hpp
+        command/scene/ClearSceneCommand.cpp
+        command/scene/ClearSceneCommand.hpp
+        command/scene/GetCameraIDsSceneCommand.cpp
+        command/scene/GetCameraIDsSceneCommand.hpp
+        command/scene/GetObjectIDsSceneCommand.cpp
+        command/scene/GetObjectIDsSceneCommand.hpp
+        command/BaseCommand.cpp
+        command/BaseCommand.hpp
+        concepts/Concept.hpp
+        director/BaseCarcassModelDirector.cpp
+        director/BaseCarcassModelDirector.hpp
+        director/BaseDirector.cpp
+        director/BaseDirector.hpp
+        director/BaseDirectorCreator.hpp
+        director/DirectorCreator.h
+        director/DirectorCreator.hpp
+        director/DirectorSolution.cpp
+        director/DirectorSolution.h
+        director/DirectorSolution.hpp
+        director/LinkListModelDirector.cpp
+        director/LinkListModelDirector.hpp
+        director/MatrixModelDirector.cpp
+        director/MatrixModelDirector.hpp
+        drawer/BaseDrawer.cpp
+        drawer/BaseDrawerCreator.cpp
+        drawer/BaseDrawerCreator.hpp
+        drawer/QtDrawer.cpp
+        drawer/QtDrawer.hpp
+        drawer/QtDrawerCreator.cpp
+        drawer/QtDrawerCreator.hpp
+        exception/Exception.cpp
+        exception/Exception.hpp
+        facade/Facade.cpp
+        facade/Facade.hpp
+        manager/DrawManager.h
+        manager/DrawManager.hpp
+        manager/LoadManager.cpp
+        manager/LoadManager.hpp
+        manager/SceneManager.cpp
+        manager/SceneManager.hpp
+        manager/TransformManager.cpp
+        manager/TransformManager.hpp
+        objects/BaseModel.cpp
+        objects/CarcassModel.cpp
+        objects/Camera.cpp
+        objects/Camera.hpp
+        objects/Composite.cpp
+        objects/Composite.hpp
+        objects/Edge.cpp
+        objects/InvisibleObject.cpp
+        objects/InvisibleObject.hpp
+        objects/ListModelStructure.cpp
+        objects/ListModelStructure.hpp
+        objects/MatrixModelStructure.cpp
+        objects/MatrixModelStructure.hpp
+        objects/ModelStructure.cpp
+        objects/BaseObject.cpp
+        objects/Vertex.cpp
+        objects/VisibleObject.cpp
+        loader/BaseLoader.cpp
+        loader/BaseLoaderCreator.hpp
+        loader/CarcassModelLoader.cpp
+        loader/CarcassModelLoader.hpp
+        loader/LoaderCreator.hpp
+        loader/LoaderCreator.hpp
+        loader/LoaderSolution.cpp
+        loader/LoaderSolution.h
+        loader/LoaderSolution.hpp
+        loader/CsvModelLoader.cpp
+        loader/CsvModelLoader.hpp
+        loader/TxtModelLoader.cpp
+        loader/TxtModelLoader.hpp
+        scene/Scene.cpp
+        scene/Scene.hpp
+        transform_strategy/CameraProjectionAction.cpp
+        transform_strategy/CameraProjectionAction.hpp
+        transform_strategy/RotateAction.cpp
+        transform_strategy/RotateAction.hpp
+        transform_strategy/ScaleAction.cpp
+        transform_strategy/ScaleAction.hpp
+        transform_strategy/MoveAction.cpp
+        transform_strategy/MoveAction.hpp
+        transform_strategy/TransformAction.cpp
+        visitor/DrawVisitor.cpp
+        visitor/TransformVisitor.cpp
         main.cpp
         mainwindow.cpp
         mainwindow.hpp
-        mainwindow.ui
-        exceptions/Exceptions.hpp
-        matrix/concept/MatrixConcept.hpp
-        matrix/exception/ExceptionMatrix.hpp
-        matrix/exception/ExceptionMatrix.сpp
-        matrix/iterator/ConstIterator.cpp
-        matrix/iterator/ConstIterator.hpp
-        matrix/iterator/MatrixIterator.cpp
-        matrix/iterator/MatrixIterator.hpp
-        matrix/matrix/MatrixRow.cpp
-        matrix/matrix/Matrix.hpp
-        matrix/matrix/Matrix.h
-        objects/visible_objects/structures/Edge.cpp
-        objects/visible_objects/structures/Edge.hpp
-        objects/visible_objects/structures/LinkDotStructure.cpp
-        objects/visible_objects/structures/LinkDotStructure.hpp
-        objects/visible_objects/structures/MatrixStructure.cpp
-        objects/visible_objects/structures/MatrixStructure.hpp
-        objects/visible_objects/structures/ModelStructure.cpp
-        objects/visible_objects/structures/ModelStructure.hpp
-        objects/visible_objects/structures/Vertex.cpp
-        objects/visible_objects/structures/Vertex.hpp
-        objects/visible_objects/BaseModel.cpp
-        objects/visible_objects/BaseModel.hpp
-        objects/visible_objects/CarcassModel.cpp
-        objects/visible_objects/CarcassModel.hpp
-        objects/visible_objects/VisibleObject.cpp
-        objects/visible_objects/VisibleObject.hpp
-        objects/BaseObject.cpp
-        objects/BaseObject.hpp
-        objects/Composite.cpp
-        objects/Composite.hpp
-        objects/invisible_objects/Camera.cpp
-        objects/invisible_objects/Camera.hpp
-        objects/invisible_objects/InvisibleObject.cpp
-        objects/invisible_objects/InvisibleObject.hpp
-        managers/DrawManager.cpp
-        managers/DrawManager.hpp
-        managers/LoadManager.cpp
-        managers/LoadManager.hpp
-        managers/SceneManager.cpp
-        managers/SceneManager.hpp
-        managers/TransformManager.cpp
-        managers/TransformManager.hpp
-        concepts/Concepts.hpp
-        adapters/composite/CompositeAdapter.hpp
-        adapters/composite/DrawCompositeAdapter.cpp
-        adapters/composite/DrawCompositeAdapter.hpp
-        adapters/model/DrawCarcassModelAdapter.cpp
-        adapters/model/DrawCarcassModelAdapter.hpp
-        adapters/model/ModelAdapter.hpp
-        adapters/BaseAdapter.hpp
-        load/loader/LoaderSolution.cpp
-        load/loader/LoaderSolution.hpp
-        load/loader/BaseLoader.cpp
-        load/loader/BaseLoader.hpp
-        load/loader/BaseLoaderCreator.cpp
-        load/loader/BaseLoaderCreator.hpp
-        load/loader/ModelCsvLoaderCreator.cpp
-        load/loader/ModelCsvLoaderCreator.hpp
-        load/loader/ModelTxtLoaderCreator.cpp
-        load/loader/ModelTxtLoaderCreator.hpp
-        load/loader/ModelCsvLoader.cpp
-        load/loader/ModelCsvLoader.hpp
-        load/loader/ModelTxtLoader.cpp
-        load/loader/ModelTxtLoader.hpp
-        load/director/LinkListDirector.cpp
-        load/director/LinkListDirector.hpp
-        load/director/MatrixDirector.cpp
-        load/director/MatrixDirector.hpp
-        load/builder/BaseBuilder.cpp
-        load/builder/BaseBuilder.hpp
-        load/builder/BaseModelBuilder.cpp
-        load/builder/BaseModelBuilder.hpp
-        load/builder/MatrixBuilder.cpp
-        load/builder/MatrixBuilder.hpp
-        load/builder/LinkListBuilder.cpp
-        load/builder/LinkListBuilder.hpp
-        drawer/AbstractDrawerFactory.cpp
-        drawer/BaseDrawer.cpp
-        drawer/QtDrawer.cpp
-        drawer/QtDrawerFactory.cpp
-        drawer/AbstractDrawerFactory.cpp
-        drawer/QtDrawer.cpp
-        drawer/QtDrawerFactory.cpp
-        drawer/BaseDrawer.cpp
-        transform/TransformBuilder.cpp
-        transform/TransformBuilder.hpp
-        adapters/composite/TransformCompositeAdapter.cpp
-        adapters/composite/TransformCompositeAdapter.hpp
-        adapters/model/TransformModelAdapter.cpp
-        adapters/model/TransformModelAdapter.hpp
-
 )
+
+# Альтернативно можно использовать явное перечисление, как у вас было,
+# но GLOB_RECURSE удобнее для больших проектов
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(lab_03
@@ -150,18 +192,32 @@ else ()
     )
 endif ()
 
-target_link_libraries(lab_03 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-if (${QT_VERSION} VERSION_LESS 6.1.0)
-    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.lab_03)
-endif ()
-set_target_properties(lab_03 PROPERTIES
-        ${BUNDLE_ID_OPTION}
-        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-        MACOSX_BUNDLE TRUE
-        WIN32_EXECUTABLE TRUE
+# Линковка с Qt и SQLite
+target_link_libraries(lab_03 PRIVATE
+        Qt${QT_VERSION_MAJOR}::Widgets
+        ${SQLite3_LIBRARIES}  # Добавляем библиотеку SQLite
 )
+
+# Для macOS специфичные настройки
+if (APPLE)
+    if (${QT_VERSION} VERSION_LESS 6.1.0)
+        set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.lab_03)
+    endif ()
+
+    set_target_properties(lab_03 PROPERTIES
+            ${BUNDLE_ID_OPTION}
+            MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+            MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+            MACOSX_BUNDLE TRUE
+    )
+endif ()
+
+# Для Windows специфичные настройки
+if (WIN32)
+    set_target_properties(lab_03 PROPERTIES
+            WIN32_EXECUTABLE TRUE
+    )
+endif ()
 
 include(GNUInstallDirs)
 install(TARGETS lab_03

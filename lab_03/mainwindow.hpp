@@ -1,21 +1,8 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
-#include <QFileDialog>
-#include <QGraphicsScene>
 #include <QMainWindow>
-#include <QMessageBox>
 
-#include "BaseCommand.hpp"
-#include "BaseDrawer.hpp"
-#include "CameraCommand.hpp"
-#include "DrawerFactorySolution.cpp"
-#include "Exceptions.hpp"
 #include "Facade.hpp"
-#include "ModelCommand.hpp"
-#include "ModelsCommand.hpp"
-#include "QtDrawerFactory.hpp"
-#include "SceneCommand.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,60 +10,32 @@ namespace Ui {
 }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow {
+class MyMainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-
-private slots:
-    void on_addCameraBtn_clicked();
-
-    void on_loadModelBtn_clicked();
-
-    void on_deleteModelBtn_clicked();
-
-    void on_deleteModelsBtn_clicked();
-
-    void on_cameraCB_currentIndexChanged(int index);
-
-    void on_deleteCameraBtn_clicked();
-
-    void on_upBtn_clicked();
-
-    void on_rigthBtn_clicked();
-
-    void on_downBtn_clicked();
-
-    void on_leftBtn_clicked();
-
-    void on_moveBtn_clicked();
-
-    void on_scaleBtn_clicked();
-
-    void on_rotateBtn_clicked();
-
-    void on_moveAllBtn_clicked();
-
-    void on_scaleAllBtn_clicked();
-
-    void on_rotateAllBtn_clicked();
-
-protected:
-    void setupScene();
-    void updateScene();
-    void checkCamExist();
-    void checkModelsExist();
-    void checkCamDelete();
+    MyMainWindow(QWidget *parent = 0);
+    ~MyMainWindow();
 
 private:
+    void connectButtons();
     Ui::MainWindow *ui;
-    QGraphicsScene *_scene;
-    std::shared_ptr<Facade> _facade;
-    std::shared_ptr<BaseDrawer> _drawer;
-    std::vector<std::size_t> _models;
-    std::vector<std::size_t> _cameras;
-    std::size_t _camInd;
+    Facade _facade;
+private slots:
+    void on_loadButton_clicked();
+    void on_addCameraButton_clicked();
+    void on_setCameraButton_clicked();
+    void on_moveButton_clicked();
+    void on_rotateButton_clicked();
+    void on_scaleButton_clicked();
+    void on_deleteSelectedButton_clicked();
+    void on_objectsCompositeButton_clicked();
+
+
+private:
+    void drawScene();
+    void updateCameraList();
+    void updateObjectList();
+    std::vector<size_t> getSelectedObjectIds();
+    std::vector<size_t> getSelectedCameraIds();
 };
-#endif// MAINWINDOW_H

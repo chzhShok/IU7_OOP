@@ -1,11 +1,10 @@
 #pragma once
 
 #include <list>
-#include <memory>
-#include <vector>
 
 #include "BaseObject.hpp"
-#include "Composite.hpp"
+#include "SceneManager.hpp"
+#include "Visitor.hpp"
 
 class Scene {
     friend class SceneManager;
@@ -26,11 +25,10 @@ public:
     void removeObject(const const_iterator &it);
     void addComposite(const std::vector<std::shared_ptr<BaseObject>> objects);
 
-    std::size_t addCamera(const Vertex &location);
-    void removeCamera(const iteratorCamera &it);
+    void addCamera(const std::shared_ptr<BaseObject> obj);
+    void removeCamera(const std::list<iterator>::const_iterator &it);
     std::shared_ptr<BaseObject> getCamera(const iteratorCamera &it);
 
-    // Доступ к объектам
     iterator begin();
     iterator end();
     const_iterator begin() const;
@@ -48,13 +46,10 @@ public:
     iteratorCamera beginCamera();
     iteratorCamera endCamera();
 
-    std::vector<std::shared_ptr<BaseObject>> getVisibleObjects() const;
-    iterator getObjectIter(const std::size_t id);
-    std::shared_ptr<BaseObject> getObject(const std::size_t id);
-
+    void accept(std::shared_ptr<Visitor>);
     std::shared_ptr<Scene> clone();
 
-private:
+protected:
     std::list<std::shared_ptr<BaseObject>> _objects;
     std::list<iterator> _cameras;
 };
