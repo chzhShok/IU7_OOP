@@ -12,16 +12,25 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Поиск Qt
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
 
 # Поиск SQLite
 find_package(SQLite3 REQUIRED)
+find_package(nlohmann_json 3.11.2 REQUIRED)
+#include(FetchContent)
+#
+#FetchContent_Declare(
+#        nlohmann_json
+#        GIT_REPOSITORY https://github.com/nlohmann/json.git
+#        GIT_TAG v3.11.2  # или другая версия
+#)
+#
+#FetchContent_MakeAvailable(nlohmann_json)
 
 # Включение всех заголовочных файлов через один вызов
 include_directories(
         builder
-        center
         command
         command/camera
         command/draw
@@ -37,23 +46,26 @@ include_directories(
         objects
         loader
         scene
-        matrix
-        transform_strategy
+        strategy
+        transform
         visitor
+        matrix
 )
 
 # Группировка исходных файлов
 set(PROJECT_SOURCES
         builder/BaseCarcassModelBuilder.cpp
         builder/BaseCarcassModelBuilder.hpp
-        builder/LinkListModelBuilder.cpp
-        builder/LinkListModelBuilder.hpp
+        builder/ListModelBuilder.cpp
+        builder/ListModelBuilder.hpp
         builder/MatrixModelBuilder.cpp
         builder/MatrixModelBuilder.hpp
         command/camera/AddCameraCommand.cpp
         command/camera/AddCameraCommand.hpp
         command/camera/BaseCameraCommand.cpp
         command/camera/BaseCameraCommand.hpp
+        command/camera/MoveCameraCommand.cpp
+        command/camera/MoveCameraCommand.hpp
         command/camera/RemoveCameraCommand.cpp
         command/camera/RemoveCameraCommand.hpp
         command/camera/SetCameraCommand.cpp
@@ -70,22 +82,24 @@ set(PROJECT_SOURCES
         command/load/ListLoadCommand.hpp
         command/load/MatrixLoadCommand.cpp
         command/load/MatrixLoadCommand.hpp
-        command/load/CsvLoadCommandDecorator.cpp
-        command/load/CsvLoadCommandDecorator.hpp
+        command/load/JsonLoadCommandDecorator.cpp
+        command/load/JsonLoadCommandDecorator.hpp
         command/load/TxtLoadCommandDecorator.cpp
         command/load/TxtLoadCommandDecorator.hpp
         command/object/BaseObjectCommand.cpp
         command/object/BaseObjectCommand.hpp
         command/object/CompositeObjectCommand.cpp
         command/object/CompositeObjectCommand.hpp
-        command/object/DeleteObjectCommand.cpp
-        command/object/DeleteObjectCommand.hpp
+        command/object/GetObjectCommand.cpp
+        command/object/GetObjectCommand.hpp
+        command/object/MoveObjectCommand.cpp
+        command/object/MoveObjectCommand.hpp
+        command/object/RemoveObjectCommand.cpp
+        command/object/RemoveObjectCommand.hpp
         command/object/RotateObjectCommand.cpp
         command/object/RotateObjectCommand.hpp
         command/object/ScaleObjectCommand.cpp
         command/object/ScaleObjectCommand.hpp
-        command/object/MoveObjectCommand.cpp
-        command/object/MoveObjectCommand.hpp
         command/scene/BaseSceneCommand.cpp
         command/scene/BaseSceneCommand.hpp
         command/scene/ClearSceneCommand.cpp
@@ -105,15 +119,13 @@ set(PROJECT_SOURCES
         director/DirectorCreator.h
         director/DirectorCreator.hpp
         director/DirectorSolution.cpp
-        director/DirectorSolution.h
         director/DirectorSolution.hpp
-        director/LinkListModelDirector.cpp
-        director/LinkListModelDirector.hpp
+        director/ListModelDirector.cpp
+        director/ListModelDirector.hpp
         director/MatrixModelDirector.cpp
         director/MatrixModelDirector.hpp
         drawer/BaseDrawer.cpp
         drawer/BaseDrawerCreator.cpp
-        drawer/BaseDrawerCreator.hpp
         drawer/QtDrawer.cpp
         drawer/QtDrawer.hpp
         drawer/QtDrawerCreator.cpp
@@ -122,21 +134,40 @@ set(PROJECT_SOURCES
         exception/Exception.hpp
         facade/Facade.cpp
         facade/Facade.hpp
-        manager/DrawManager.h
-        manager/DrawManager.hpp
+        loader/BaseLoader.cpp
+        loader/BaseLoader.hpp
+        loader/BaseLoaderCreator.hpp
+        loader/CarcassModelLoader.cpp
+        loader/CarcassModelLoader.hpp
+        loader/LoaderCreator.h
+        loader/LoaderCreator.hpp
+        loader/LoaderSolution.cpp
+        loader/LoaderSolution.hpp
+        loader/JsonModelLoader.cpp
+        loader/JsonModelLoader.hpp
+        loader/TxtModelLoader.cpp
+        loader/TxtModelLoader.hpp
         manager/LoadManager.cpp
         manager/LoadManager.hpp
         manager/SceneManager.cpp
         manager/SceneManager.hpp
         manager/TransformManager.cpp
         manager/TransformManager.hpp
+        matrix/Matrix.h
+        matrix/Matrix.hpp
+        matrix/MatrixRow.hpp
         objects/BaseModel.cpp
+        objects/BaseModel.hpp
+        objects/BaseObject.cpp
+        objects/BaseObject.hpp
         objects/CarcassModel.cpp
+        objects/CarcassModel.hpp
         objects/Camera.cpp
         objects/Camera.hpp
         objects/Composite.cpp
         objects/Composite.hpp
         objects/Edge.cpp
+        objects/Edge.hpp
         objects/InvisibleObject.cpp
         objects/InvisibleObject.hpp
         objects/ListModelStructure.cpp
@@ -144,38 +175,30 @@ set(PROJECT_SOURCES
         objects/MatrixModelStructure.cpp
         objects/MatrixModelStructure.hpp
         objects/ModelStructure.cpp
-        objects/BaseObject.cpp
+        objects/ModelStructure.hpp
         objects/Vertex.cpp
         objects/VisibleObject.cpp
-        loader/BaseLoader.cpp
-        loader/BaseLoaderCreator.hpp
-        loader/CarcassModelLoader.cpp
-        loader/CarcassModelLoader.hpp
-        loader/LoaderCreator.hpp
-        loader/LoaderCreator.hpp
-        loader/LoaderSolution.cpp
-        loader/LoaderSolution.h
-        loader/LoaderSolution.hpp
-        loader/CsvModelLoader.cpp
-        loader/CsvModelLoader.hpp
-        loader/TxtModelLoader.cpp
-        loader/TxtModelLoader.hpp
+        objects/VisibleObject.hpp
         scene/Scene.cpp
         scene/Scene.hpp
-        transform_strategy/CameraProjectionAction.cpp
-        transform_strategy/CameraProjectionAction.hpp
-        transform_strategy/RotateAction.cpp
-        transform_strategy/RotateAction.hpp
-        transform_strategy/ScaleAction.cpp
-        transform_strategy/ScaleAction.hpp
-        transform_strategy/MoveAction.cpp
-        transform_strategy/MoveAction.hpp
-        transform_strategy/TransformAction.cpp
+        strategy/CenterStrategy.cpp
+        strategy/CenterStrategy.hpp
+        transform/CameraProjectionAction.cpp
+        transform/MoveAction.cpp
+        transform/MoveAction.hpp
+        transform/RotateAction.cpp
+        transform/RotateAction.hpp
+        transform/ScaleAction.cpp
+        transform/ScaleAction.hpp
+        transform/TransformAction.cpp
+        transform/TransformCaretaker.cpp
+        transform/TransformMemento.cpp
         visitor/DrawVisitor.cpp
-        visitor/TransformVisitor.cpp
         main.cpp
         mainwindow.cpp
         mainwindow.hpp
+        strategy/BaseCenterStrategy.hpp
+        strategy/BaseCenterStrategy.cpp
 )
 
 # Альтернативно можно использовать явное перечисление, как у вас было,
@@ -195,7 +218,9 @@ endif ()
 # Линковка с Qt и SQLite
 target_link_libraries(lab_03 PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
-        ${SQLite3_LIBRARIES}  # Добавляем библиотеку SQLite
+        Qt${QT_VERSION_MAJOR}::Sql
+        ${SQLite3_LIBRARIES}
+        nlohmann_json::nlohmann_json
 )
 
 # Для macOS специфичные настройки

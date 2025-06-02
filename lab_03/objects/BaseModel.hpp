@@ -9,8 +9,11 @@ public:
 
     virtual void add(std::shared_ptr<BaseObject> obj);
     virtual void remove(const iterator &it);
+    virtual void transform(const TransformAction &action);
+
     virtual iterator begin();
     virtual iterator end();
-    virtual void accept(std::shared_ptr<Visitor> v);
+
+    virtual void accept(const Visitor &visitor);
     virtual std::shared_ptr<BaseObject> clone() const;
 };

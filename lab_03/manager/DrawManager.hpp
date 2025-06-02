@@ -1,12 +1,12 @@
+#pragma once
+
 template<typename DrawerCreator, typename... Args>
     requires NotAbstract<DrawerCreator> && Derivative<DrawerCreator, BaseDrawerCreator> && Constructible<DrawerCreator, Args...>
-void DrawManager::drawScene(std::shared_ptr<SceneManager> sceneMngr, Args... args) {
-    auto camera = sceneMngr->getMainCamera();
-    auto scene = sceneMngr->getScene();
+void DrawManager::drawScene(std::shared_ptr<Scene> scene, std::shared_ptr<Camera> camera, Args... args) {
     DrawerCreator drawerCreator(args...);
     std::shared_ptr<BaseDrawer> drawer = drawerCreator.create();
-    DrawVisitor vis(drawer, camera);
+    DrawVisitor visitor(drawer, camera);
 
-    for (auto it = scene->begin(); it != scene->end(); ++it)
-        (*it)->accept(std::make_shared<DrawVisitor>(vis));
+    for (auto &item: *scene)
+        item->accept(visitor);
 }

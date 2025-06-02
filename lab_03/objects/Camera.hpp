@@ -1,14 +1,11 @@
 #pragma once
 
-#include "CameraProjectionAction.hpp"
 #include "DrawVisitor.hpp"
 #include "InvisibleObject.hpp"
 #include "TransformAction.hpp"
-#include "TransformVisitor.hpp"
 
 class Camera : public InvisibleObject {
     friend class DrawVisitor;
-    friend class TransformVisitor;
     friend class CameraProjectionAction;
 
 public:
@@ -16,12 +13,12 @@ public:
     Camera(double x, double y, double z);
     explicit Camera(const Vertex &p);
     explicit Camera(const Camera &other);
+    virtual ~Camera() = default;
 
     virtual bool isComposite() const;
-    virtual void accept(std::shared_ptr<Visitor> v);
+    virtual void transform(const TransformAction &action);
+    virtual void accept(const Visitor &visitor);
     virtual Vertex getCenter() const;
-
-    virtual ~Camera() = default;
 
 protected:
     Vertex _self;

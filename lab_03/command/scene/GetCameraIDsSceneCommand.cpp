@@ -1,11 +1,11 @@
 #include "GetCameraIDsSceneCommand.hpp"
 
-GetCameraIDsSceneCommand::GetCameraIDsSceneCommand() : _ids(std::vector<std::size_t>()) {}
+GetCameraIDsSceneCommand::GetCameraIDsSceneCommand() : __ids(std::vector<size_t>()) {}
 
 void GetCameraIDsSceneCommand::execute() {
-    _ids = _sceneManager->getCameraIds();
+    __ids = _sceneManager->getCameraIds();
 }
 
-std::vector<std::size_t> GetCameraIDsSceneCommand::getIDs() {
-    return _ids;
+std::vector<size_t> GetCameraIDsSceneCommand::getIDs() {
+    return __ids;
 }

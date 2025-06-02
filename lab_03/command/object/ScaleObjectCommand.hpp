@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "BaseObjectCommand.hpp"
 
 class ScaleObjectCommand : public BaseObjectCommand {
@@ -11,8 +13,8 @@ public:
     virtual void execute();
 
 private:
-    size_t _id;
-    double _kx;
-    double _ky;
-    double _kz;
+    size_t __id;
+    double __kx;
+    double __ky;
+    double __kz;
 };

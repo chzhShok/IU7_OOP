@@ -1,18 +1,17 @@
 #include "BaseObject.hpp"
-#include "Visitor.hpp"
 
-std::size_t GetNextId() {
-    static std::size_t id = 0;
-    return id++;
+static std::size_t counter = 0;
+
+std::size_t getNextId() {
+    return counter++;
 }
 
-BaseObject::BaseObject() : _id(GetNextId()) {}
-
-BaseObject::~BaseObject() {}
-
-
-std::size_t BaseObject::getId() const {
-    return _id;
+BaseObject::BaseObject() : _transformMatrix(Matrix<double>(4)) {
+    _id = getNextId();
+    _transformMatrix[0][0] = 1;
+    _transformMatrix[1][1] = 1;
+    _transformMatrix[2][2] = 1;
+    _transformMatrix[3][3] = 1;
 }
 
 void BaseObject::add(std::shared_ptr<BaseObject> obj) {
@@ -31,18 +30,26 @@ BaseObject::iterator BaseObject::end() {
     return iterator();
 }
 
-void BaseObject::accept(std::shared_ptr<Visitor> v) {
-    (void) v;
+void BaseObject::accept(const Visitor &visitor) {
+    (void) visitor;
 }
 
 std::shared_ptr<BaseObject> BaseObject::clone() const {
     return nullptr;
 }
 
-Vertex BaseObject::getCenter() const {
-    return Vertex();
+std::size_t BaseObject::getId() const {
+    return _id;
 }
 
-bool BaseObject::isComposite() const {
-    return false;
+void BaseObject::transform(const TransformAction &action) {
+    _transformMatrix = _transformMatrix * action.getMatrix();
+}
+
+Matrix<double> BaseObject::getTransformMatrix() const {
+    return _transformMatrix;
+}
+
+void BaseObject::setTransformMatrix(const Matrix<double> &matrix) {
+    _transformMatrix = matrix;
 }

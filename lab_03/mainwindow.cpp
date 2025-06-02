@@ -1,5 +1,4 @@
 #include "mainwindow.hpp"
-#include "ui_mainwindow.h"
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -7,69 +6,95 @@
 
 #include "AddCameraCommand.hpp"
 #include "CompositeObjectCommand.hpp"
-#include "CsvLoadCommandDecorator.hpp"
-#include "DeleteObjectCommand.hpp"
 #include "DrawSceneQtCommand.hpp"
 #include "Exception.hpp"
 #include "GetCameraIDsSceneCommand.hpp"
 #include "GetObjectIDsSceneCommand.hpp"
+#include "JsonLoadCommandDecorator.hpp"
 #include "ListLoadCommand.hpp"
 #include "MatrixLoadCommand.hpp"
+#include "MoveCameraCommand.hpp"
 #include "MoveObjectCommand.hpp"
 #include "RemoveCameraCommand.hpp"
+#include "RemoveObjectCommand.hpp"
 #include "RotateObjectCommand.hpp"
 #include "ScaleObjectCommand.hpp"
 #include "SetCameraCommand.hpp"
 #include "TxtLoadCommandDecorator.hpp"
 #include "Vertex.hpp"
 
-double degToRad(double angle) {
+double degreesToRadians(double angle) {
     return angle / 180.0 * M_PI;
+}
+
+void MyMainWindow::logMessage(const QString &message) {
+    QString timestamp = QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss] ");
+    ui->logText->append(timestamp + message);
+}
+
+void MyMainWindow::logError(const QString &message) {
+    QString errorMsg = QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss] ") + "<font color='red'>[ОШИБКА] " + message + "</font>";
+    ui->logText->append(errorMsg);
+    QMessageBox::critical(nullptr, "Ошибка", message);
 }
 
 MyMainWindow::MyMainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    ui->canvas->setScene(new QGraphicsScene);
-    ui->canvas->scene()->setSceneRect(ui->canvas->sceneRect());
-    ui->canvas->setBackgroundBrush(Qt::white);
-
-    ui->structureComboBox->addItem("Список", 0);
-    ui->structureComboBox->addItem("Матрица", 1);
-    ui->objectsList->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui->graphicsView->setScene(new QGraphicsScene);
+    ui->graphicsView->scene()->setSceneRect(ui->graphicsView->sceneRect());
+    connectButtons();
 }
 
 MyMainWindow::~MyMainWindow() {
     delete ui;
 }
 
-bool endsWith(const std::string &str, const std::string &suffix) {
-    if (str.length() >= suffix.length())
-        return (0 == str.compare(str.length() - suffix.length(), suffix.length(), suffix));
-    else
-        return false;
+void MyMainWindow::connectButtons() {
+    connect(ui->loadButton, &QPushButton::clicked, this, &MyMainWindow::on_loadButton_clicked);
+    connect(ui->addCameraButton, &QPushButton::clicked, this, &MyMainWindow::on_cameraAddPushbutton_clicked);
+    connect(ui->deleteCameraButton, &QPushButton::clicked, this, &MyMainWindow::on_cameraDeletePushbutton_clicked);
+    connect(ui->setCameraButton, &QPushButton::clicked, this, &MyMainWindow::on_cameraSetPushbutton_clicked);
+    connect(ui->moveCameraButton, &QPushButton::clicked, this, &MyMainWindow::on_cameraMoveButton_clicked);
+    connect(ui->moveButton, &QPushButton::clicked, this, &MyMainWindow::on_objectMovePushbutton_clicked);
+    connect(ui->rotateButton, &QPushButton::clicked, this, &MyMainWindow::on_objectRotatePushbutton_clicked);
+    connect(ui->scaleButton, &QPushButton::clicked, this, &MyMainWindow::on_objectScalePushbutton_clicked);
+    connect(ui->deleteSelectedButton, &QPushButton::clicked, this, &MyMainWindow::on_objectDeletePushbutton_clicked);
+    connect(ui->compositeButton, &QPushButton::clicked, this, &MyMainWindow::on_objectCompositePushbutton_clicked);
+    connect(ui->stepBackButton, &QPushButton::clicked, this, &MyMainWindow::on_undoButton_clicked);
 }
 
-//TODO
 void MyMainWindow::on_loadButton_clicked() {
-    std::string fileName = ui->filePath->text().toStdString();
+    std::string str = ui->fileNameLine->text().toStdString();
+    const char *fname = str.c_str();
+
+    logMessage("Начата загрузка модели из файла: " + QString(fname));
 
     std::shared_ptr<BaseLoadCommand> command;
 
-    if (ui->structureComboBox->currentText() == "Список")
+    if (ui->figureTypeComboBox->currentText() == "Список") {
         command = std::make_shared<ListLoadCommand>();
-    else
+        logMessage("Выбрано представление: Список");
+    } else {
         command = std::make_shared<MatrixLoadCommand>();
+        logMessage("Выбрано представление: Матрица");
+    }
 
     std::shared_ptr<BaseCommand> decorator;
-    if (endsWith(fileName, ".csv"))
-        decorator = std::make_shared<CsvLoadCommandDecorator>(*command, fileName);
-    else
-        decorator = std::make_shared<TxtLoadCommandDecorator>(*command, fileName);
+    if (ui->fileTypeComboBox->currentText() == "Txt") {
+        decorator = std::make_shared<TxtLoadCommandDecorator>(*command, fname);
+        logMessage("Выбран формат файла: TXT");
+    } else {
+        decorator = std::make_shared<JsonLoadCommandDecorator>(*command, fname);
+        logMessage("Выбран формат файла: Json");
+    }
 
     try {
         _facade.execute(*decorator);
-    } catch (BaseException &exc) {
-        QMessageBox::critical(nullptr, "Ошибка", exc.what());
+        logMessage("Модель успешно загружена");
+    } catch (Exception &exc) {
+        QString errorMsg = QString("Ошибка загрузки: ") + exc.what();
+        logMessage("<font color='red'>" + errorMsg + "</font>");
+        QMessageBox::critical(nullptr, "Ошибка", errorMsg);
         return;
     }
 
@@ -77,173 +102,260 @@ void MyMainWindow::on_loadButton_clicked() {
     updateObjectList();
 }
 
-//TODO
-void MyMainWindow::on_addCameraButton_clicked() {
+void MyMainWindow::on_cameraAddPushbutton_clicked() {
+    double x = ui->xCameraSpin->value();
+    double y = ui->yCameraSpin->value();
+    double z = ui->zCameraSpin->value();
+    Vertex pos(x, y, z);
+
+    AddCameraCommand command(pos);
+    try {
+        _facade.execute(command);
+        logMessage(QString("Добавлена камера [X: %1, Y: %2, Z: %3]").arg(x).arg(y).arg(z));
+    } catch (Exception &exc) {
+        logError(exc.what());
+        return;
+    }
+
+    updateCameraList();
+    updateObjectList();
+}
+
+void MyMainWindow::on_cameraDeletePushbutton_clicked() {
+    auto cams = getSelectedCameraIds();
+    if (cams.empty()) {
+        logError("Не выбраны камеры для удаления");
+        return;
+    }
+
+    for (size_t id: cams) {
+        try {
+            RemoveCameraCommand command(id);
+            _facade.execute(command);
+            logMessage(QString("Удалена камера [ID: %1]").arg(id));
+        } catch (Exception &exc) {
+            logError(exc.what());
+        }
+    }
+
+    updateCameraList();
+    updateObjectList();
+}
+
+void MyMainWindow::on_cameraSetPushbutton_clicked() {
+    auto cams = getSelectedCameraIds();
+    if (cams.size() != 1) {
+        logError("Для установки должна быть выбрана ровно одна камера");
+        return;
+    }
+
+    try {
+        SetCameraCommand command(cams[0]);
+        _facade.execute(command);
+        logMessage(QString("Установлена активная камера [ID: %1]").arg(cams[0]));
+        drawScene();
+    } catch (Exception &exc) {
+        logError(exc.what());
+    }
+}
+
+void MyMainWindow::on_cameraMoveButton_clicked() {
     double x = ui->xCameraSpin->value();
     double y = ui->yCameraSpin->value();
     double z = ui->zCameraSpin->value();
 
-    Vertex pos(x, y, z);
-    AddCameraCommand command(pos);
-
-    _facade.execute(command);
-
-    updateCameraList();
-    updateObjectList();
-}
-
-//TODO
-void MyMainWindow::on_setCameraButton_clicked() {
     auto cams = getSelectedCameraIds();
-    if (cams.size() != 1) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать ровно одну камеру.");
+    if (cams.empty()) {
+        logError("Не выбраны камеры для перемещения");
         return;
     }
 
-    SetCameraCommand command(cams[0]);
-    _facade.execute(command);
+    for (size_t id: cams) {
+        try {
+            MoveCameraCommand command(id, x, y, z);
+            _facade.execute(command);
+            logMessage(QString("Перемещена камера [ID: %1] на [ΔX: %2, ΔY: %3, ΔZ: %4]").arg(id).arg(x).arg(y).arg(z));
+        } catch (Exception &exc) {
+            logError(exc.what());
+        }
+    }
+
     drawScene();
 }
 
 void MyMainWindow::updateCameraList() {
-    ui->cameraList->clear();
-
+    ui->camerasList->clear();
     GetCameraIDsSceneCommand ids;
-
     _facade.execute(ids);
-    std::vector<size_t> cameraIds = ids.getIDs();
 
+    std::vector<size_t> cameraIds = ids.getIDs();
     for (size_t id: cameraIds)
-        ui->cameraList->addItem(QString::number(id));
+        ui->camerasList->addItem(QString::number(id));
 }
 
 void MyMainWindow::updateObjectList() {
     ui->objectsList->clear();
-
     GetObjectIDsSceneCommand ids;
-
     _facade.execute(ids);
-    std::vector<size_t> objectIds = ids.getIDs();
 
+    std::vector<size_t> objectIds = ids.getIDs();
     for (size_t id: objectIds)
         ui->objectsList->addItem(QString::number(id));
 }
 
-//TODO
 std::vector<size_t> MyMainWindow::getSelectedObjectIds() {
     std::vector<size_t> ids;
-    for (int i = 0; i < ui->objectsList->count(); i++) {
-        if (ui->objectsList->item(i)->isSelected()) {
+    for (int i = 0; i < ui->objectsList->count(); i++)
+        if (ui->objectsList->item(i)->isSelected())
             ids.push_back(ui->objectsList->item(i)->text().toInt());
-        }
-    }
+
     return ids;
 }
 
-//TODO
 std::vector<size_t> MyMainWindow::getSelectedCameraIds() {
     std::vector<size_t> ids;
-    for (int i = 0; i < ui->cameraList->count(); i++) {
-        if (ui->cameraList->item(i)->isSelected()) {
-            ids.push_back(ui->cameraList->item(i)->text().toInt());
-        }
-    }
+    for (int i = 0; i < ui->camerasList->count(); i++)
+        if (ui->camerasList->item(i)->isSelected())
+            ids.push_back(ui->camerasList->item(i)->text().toInt());
+
     return ids;
 }
 
-//TODO
 void MyMainWindow::drawScene() {
-    ui->canvas->scene()->clear();
-    ui->canvas->scene()->setSceneRect(ui->canvas->sceneRect());
-    DrawSceneQtCommand drawcommand(ui->canvas->scene());
+    ui->graphicsView->scene()->clear();
+    ui->graphicsView->scene()->setSceneRect(ui->graphicsView->sceneRect());
+
+    DrawSceneQtCommand drawcommand(ui->graphicsView->scene());
     _facade.execute(drawcommand);
 }
 
-//TODO
-void MyMainWindow::on_moveButton_clicked() {
+void MyMainWindow::on_objectMovePushbutton_clicked() {
     auto objs = getSelectedObjectIds();
-    if (objs.size() == 0) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
+    if (objs.empty()) {
+        logError("Не выбраны объекты для перемещения");
         return;
     }
+
     double x = ui->xMoveSpin->value();
     double y = ui->yMoveSpin->value();
     double z = ui->zMoveSpin->value();
+
     for (auto &id: objs) {
-        MoveObjectCommand command(id, x, y, z);
-        _facade.execute(command);
+        try {
+            MoveObjectCommand command(id, x, y, z);
+            _facade.execute(command);
+            logMessage(QString("Перемещен объект [ID: %1] на [ΔX: %2, ΔY: %3, ΔZ: %4]").arg(id).arg(x).arg(y).arg(z));
+        } catch (Exception &exc) {
+            logError(exc.what());
+        }
     }
 
     drawScene();
 }
 
-//TODO
-void MyMainWindow::on_rotateButton_clicked() {
+void MyMainWindow::on_objectRotatePushbutton_clicked() {
     auto objs = getSelectedObjectIds();
-    if (objs.size() == 0) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
+    if (objs.empty()) {
+        logError("Не выбраны объекты для вращения");
         return;
     }
 
-    double x = degToRad(ui->xRotateSpin->value());
-    double y = degToRad(ui->yRotateSpin->value());
-    double z = degToRad(ui->zRotateSpin->value());
+    double x = degreesToRadians(ui->xRotateSpin->value());
+    double y = degreesToRadians(ui->yRotateSpin->value());
+    double z = degreesToRadians(ui->zRotateSpin->value());
+
     for (auto &id: objs) {
-        RotateObjectCommand command(id, x, y, z);
-        _facade.execute(command);
+        try {
+            RotateObjectCommand command(id, x, y, z);
+            _facade.execute(command);
+            logMessage(QString("Повернут объект [ID: %1] на [θX: %2°, θY: %3°, θZ: %4°]").arg(id).arg(x).arg(y).arg(z));
+        } catch (Exception &exc) {
+            logError(exc.what());
+        }
     }
 
     drawScene();
 }
 
-//TODO
-void MyMainWindow::on_scaleButton_clicked() {
+
+void MyMainWindow::on_objectScalePushbutton_clicked() {
     auto objs = getSelectedObjectIds();
-    if (objs.size() == 0) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
+    if (objs.empty()) {
+        logError("Не выбраны объекты для масштабирования");
         return;
     }
+
     double x = ui->xScaleSpin->value();
     double y = ui->yScaleSpin->value();
     double z = ui->zScaleSpin->value();
+
     for (auto &id: objs) {
-        ScaleObjectCommand command(id, x, y, z);
+        try {
+            ScaleObjectCommand command(id, x, y, z);
+            _facade.execute(command);
+            logMessage(QString("Масштабирован объект [ID: %1] на [KX: %2, KY: %3, KZ: %4]").arg(id).arg(x).arg(y).arg(z));
+        } catch (Exception &exc) {
+            logError(exc.what());
+        }
+    }
+
+    drawScene();
+}
+
+void MyMainWindow::on_objectDeletePushbutton_clicked() {
+    auto objs = getSelectedObjectIds();
+    if (objs.empty()) {
+        logError("Не выбраны объекты для удаления");
+        return;
+    }
+
+    for (auto &id: objs) {
+        try {
+            RemoveObjectCommand command(id);
+            _facade.execute(command);
+            logMessage(QString("Удален объект [ID: %1]").arg(id));
+        } catch (Exception &exc) {
+            logError(exc.what());
+        }
+    }
+
+    drawScene();
+    updateCameraList();
+    updateObjectList();
+}
+
+void MyMainWindow::on_objectCompositePushbutton_clicked() {
+    auto objs = getSelectedObjectIds();
+    if (objs.empty()) {
+        logError("Не выбраны объекты для объединения");
+        return;
+    }
+
+    try {
+        CompositeObjectCommand command(objs);
         _facade.execute(command);
-    }
-
-    drawScene();
-}
-
-//TODO
-void MyMainWindow::on_deleteSelectedButton_clicked() {
-    auto objs = getSelectedObjectIds();
-    if (objs.size() == 0) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
+        logMessage(QString("Создан композитный объект из %1 элементов").arg(objs.size()));
+    } catch (Exception &exc) {
+        logError(exc.what());
         return;
     }
-    for (auto &id: objs) {
-        RemoveCameraCommand command1(id);
-        _facade.execute(command1);
-        DeleteObjectCommand command2(id);
-        _facade.execute(command2);
-    }
 
     drawScene();
-    updateObjectList();
     updateCameraList();
+    updateObjectList();
 }
 
-//TODO
-void MyMainWindow::on_objectsCompositeButton_clicked() {
-    auto objs = getSelectedObjectIds();
-    if (objs.size() == 0) {
-        QMessageBox::critical(nullptr, "Ошибка", "Нужно выбрать хотя бы один Объект.");
-        return;
+void MyMainWindow::on_undoButton_clicked() {
+    try {
+        if (!_facade.getTransformManager()->undo()) {
+            logError("Нет доступных действий для отката");
+            return;
+        } else {
+            logMessage("Выполнен откат последней трансформации");
+        }
+    } catch (Exception &exc) {
+        logError(exc.what());
     }
-    CompositeObjectCommand command(objs);
-    _facade.execute(command);
 
     drawScene();
-    updateObjectList();
-    updateCameraList();
 }

@@ -2,11 +2,11 @@
 
 ListModelStructure::ListModelStructure() : _center(Vertex()), _vertices(std::vector<Vertex>()), _edges(std::vector<Edge>()) {};
 
-void ListModelStructure::transform(std::shared_ptr<TransformAction> action) {
-    for (Vertex &vertex: _vertices) {
-        action->transformPoint(vertex);
-    }
-    action->transformPoint(_center);
+void ListModelStructure::transform(const TransformAction &action) {
+    for (Vertex &vertex: _vertices)
+        action.transformVertex(vertex);
+
+    action.transformVertex(_center);
 }
 
 std::vector<Vertex> ListModelStructure::getVertices() const {
@@ -37,8 +37,9 @@ void ListModelStructure::addEdge(const Edge &edge) {
 std::shared_ptr<ModelStructure> ListModelStructure::clone() const {
     auto cloned = std::make_shared<ListModelStructure>();
     cloned->setCenter(_center);
-    for (const Vertex &point: _vertices)
-        cloned->addVertex(point);
+
+    for (const Vertex &vertex: _vertices)
+        cloned->addVertex(vertex);
 
     for (const Edge &edge: _edges)
         cloned->addEdge(edge);

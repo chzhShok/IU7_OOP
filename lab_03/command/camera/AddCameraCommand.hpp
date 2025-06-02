@@ -7,8 +7,8 @@ public:
     AddCameraCommand(const Vertex &position);
     AddCameraCommand() = delete;
     virtual ~AddCameraCommand() = default;
-
     virtual void execute();
+
 private:
-    Vertex _position;
+    Vertex __position;
 };

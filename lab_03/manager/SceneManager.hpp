@@ -1,11 +1,10 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
-#include "BaseObject.hpp"
 #include "Camera.hpp"
-
-class Scene;
+#include "Scene.hpp"
 
 class SceneManager {
 protected:
@@ -18,15 +17,13 @@ public:
 
     void setScene(std::shared_ptr<Scene> scene);
     std::shared_ptr<Scene> getScene();
-
     void setCamera(std::shared_ptr<Camera> camera);
-
     void addObject(std::shared_ptr<BaseObject> object);
     std::vector<std::shared_ptr<BaseObject>> getObjects();
     std::shared_ptr<BaseObject> getObject(std::size_t id);
     std::vector<std::size_t> getObjectIds();
     void removeObject(std::size_t id);
-    void makeComposite(std::vector<size_t> ids);
+    void makeComposite(const std::vector<size_t>& ids);
 
     void addCamera(const Vertex &pos);
     std::vector<std::shared_ptr<BaseObject>> getCameras();

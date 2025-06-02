@@ -1,16 +1,21 @@
-template<typename ConLoaderCreator>
-    requires Derivative<ConLoaderCreator, BaseLoaderCreator>
-std::shared_ptr<ConLoaderCreator> LoaderSolution::create(std::size_t index) {
-    if (check(index)) {
-        auto creator = std::dynamic_pointer_cast<ConLoaderCreator>(_creators[index]);
-        if (!creator) {
-            time_t now = time(nullptr);
-            throw SolutionNotFoundException(ctime(&now), __FILE__, __LINE__, typeid(*this).name(), __FUNCTION__);
-        }
+#pragma once
 
-        return creator;
-    }
+#include <map>
 
-    time_t now = time(nullptr);
-    throw SolutionNotFoundException(ctime(&now), __FILE__, __LINE__, typeid(*this).name(), __FUNCTION__);
-}
+#include "BaseLoader.hpp"
+#include "BaseLoaderCreator.hpp"
+#include "Exception.hpp"
+
+class LoaderSolution {
+public:
+    LoaderSolution();
+    LoaderSolution(std::initializer_list<std::pair<size_t, std::shared_ptr<BaseLoaderCreator>>> list);
+    ~LoaderSolution();
+
+    void registerCreator(std::size_t index, std::shared_ptr<BaseLoaderCreator> creator);
+    bool check(std::size_t index);
+    std::shared_ptr<BaseLoaderCreator> create(std::size_t index);
+
+private:
+    std::map<size_t, std::shared_ptr<BaseLoaderCreator>> __creators;
+};

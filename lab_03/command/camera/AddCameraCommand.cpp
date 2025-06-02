@@ -1,7 +1,7 @@
 #include "AddCameraCommand.hpp"
 
-AddCameraCommand::AddCameraCommand(const Vertex &position) : _position(position) {}
+AddCameraCommand::AddCameraCommand(const Vertex &position) : __position(position) {}
 
 void AddCameraCommand::execute() {
-    _sceneManager->addCamera(_position);
+    _sceneManager->addCamera(__position);
 }

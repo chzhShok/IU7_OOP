@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "BaseCommand.hpp"
 
 class BaseLoadCommand : public BaseCommand {

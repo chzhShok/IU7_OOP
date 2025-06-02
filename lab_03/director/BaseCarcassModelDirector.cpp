@@ -4,16 +4,23 @@
 
 BaseCarcassModelDirector::~BaseCarcassModelDirector() {};
 
-BaseCarcassModelDirector::BaseCarcassModelDirector(std::shared_ptr<CarcassModelLoader> loader)
-    : _loader(loader) {}
+BaseCarcassModelDirector::BaseCarcassModelDirector(std::shared_ptr<CarcassModelLoader> loader) : _strategy(std::make_shared<CenterStrategy>()), _loader(loader) {}
 
-std::shared_ptr<BaseObject> BaseCarcassModelDirector::create() {
-    if (_loader == nullptr) {
-        std::cout << "BaseCarcassModelDirector::Create" << std::endl;
-    }
+void BaseCarcassModelDirector::create() {
+    _loader->open();
+    auto vertices = _loader->readVertices();
+    auto edges = _loader->readEdges();
+    _loader->close();
 
-    _builder->buildVertices();
-    _builder->buildEdges();
-    _builder->buildCenter();
+    for (auto &p: vertices)
+        _builder->buildVertex(p);
+
+    for (auto &e: edges)
+        _builder->buildEdge(e);
+
+    _builder->buildCenter(_strategy->CenterAlgorithm(vertices));
+}
+
+std::shared_ptr<BaseObject> BaseCarcassModelDirector::get() {
     return _builder->get();
 }

@@ -1,24 +1,23 @@
 #pragma once
 
-#include "DirectorSolution.h"
-#include "LoaderCreator.hpp"
-#include "LoaderSolution.h"
-
 #include <cstdlib>
 #include <memory>
 
-enum class LoaderType { TXT = 1,
-                        CSV = 2 };
+#include "DirectorSolution.hpp"
+#include "LoaderSolution.hpp"
 
-enum class DirectorType { LIST = 1,
-                          MATRIX = 2 };
+constexpr std::size_t LISTMODELDIRECTORCREATOR_ID = 1;
+constexpr std::size_t MATRIXMODELDIRECTORCREATOR_ID = 2;
+
+constexpr std::size_t TXTMODELLOADERCREATOR_ID = 1;
+constexpr std::size_t JSONMODELLOADERCREATOR_ID = 2;
 
 class LoadManager {
 public:
     LoadManager();
     ~LoadManager() = default;
 
-    std::shared_ptr<BaseObject> loadModelFile(std::size_t directorID, std::size_t loaderID, std::string filename);
+    std::shared_ptr<BaseObject> loadBoneModelFile(std::size_t directorID, std::size_t loaderID, const char *filename);
 
 protected:
     DirectorSolution _dsolution;

@@ -3,6 +3,7 @@
 #include <concepts>
 #include <memory>
 
+#include "BaseLoader.hpp"
 #include "CarcassModelLoader.hpp"
 
 class BaseLoaderCreator {
@@ -18,4 +19,4 @@ public:
     virtual std::shared_ptr<Loader> create(Args &&...args) = 0;
 };
 
-using CarcassModelLoaderCreator_t = BaseLoaderCreatorTemplate<CarcassModelLoader, std::string>;
+using CarcassModelLoaderCreator_t = BaseLoaderCreatorTemplate<CarcassModelLoader, const char *>;

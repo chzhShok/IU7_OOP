@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "BaseCarcassModelDirector.hpp"
 #include "BaseDirector.hpp"
 #include "BaseLoader.hpp"
@@ -9,12 +11,11 @@ public:
     virtual ~BaseDirectorCreator() = default;
 };
 
-template<typename Director, typename... Args>
+template<typename Director, typename Arg>
 class BaseDirectorCreatorTemplate : public BaseDirectorCreator {
 public:
     virtual ~BaseDirectorCreatorTemplate() = default;
-
-    virtual std::shared_ptr<Director> create(Args &&...args) = 0;
+    virtual std::shared_ptr<Director> create(Arg &&arg) = 0;
 };
 
 using CarcassModelDirectorCreator_t = BaseDirectorCreatorTemplate<BaseCarcassModelDirector, std::shared_ptr<CarcassModelLoader>>;

@@ -4,14 +4,30 @@ BaseModel::BaseModel() {}
 
 BaseModel::~BaseModel() {}
 
-void BaseModel::add(std::shared_ptr<BaseObject> obj) { (void) obj; }
+void BaseModel::add(std::shared_ptr<BaseObject> obj) {
+    (void) obj;
+}
 
-void BaseModel::remove(const iterator &it) { (void) it; }
+void BaseModel::remove(const iterator &it) {
+    (void) it;
+}
 
-BaseModel::iterator BaseModel::begin() { return iterator(); }
+void BaseModel::transform(const TransformAction &action) {
+    (void) action;
+}
 
-BaseModel::iterator BaseModel::end() { return iterator(); }
+BaseModel::iterator BaseModel::begin() {
+    return iterator();
+}
 
-void BaseModel::accept(std::shared_ptr<Visitor> v) { (void) v; }
+BaseModel::iterator BaseModel::end() {
+    return iterator();
+}
 
-std::shared_ptr<BaseObject> BaseModel::clone() const { return nullptr; }
+void BaseModel::accept(const Visitor &visitor) {
+    (void) visitor;
+}
+
+std::shared_ptr<BaseObject> BaseModel::clone() const {
+    return nullptr;
+}

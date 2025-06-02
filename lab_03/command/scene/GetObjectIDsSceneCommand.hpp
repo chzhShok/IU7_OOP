@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "BaseSceneCommand.hpp"
 
 class GetObjectIDsSceneCommand : public BaseSceneCommand {
@@ -11,5 +13,5 @@ public:
     std::vector<std::size_t> getIDs();
 
 private:
-    std::vector<std::size_t> _ids;
+    std::vector<std::size_t> __ids;
 };

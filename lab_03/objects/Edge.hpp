@@ -25,6 +25,6 @@ public:
     bool isNotEqual(const Edge &other) const;
 
 private:
-    size_t _first;
-    size_t _second;
+    size_t __first;
+    size_t __second;
 };

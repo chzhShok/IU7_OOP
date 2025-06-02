@@ -3,7 +3,6 @@
 #include <QGraphicsScene>
 
 #include "BaseDrawCommand.hpp"
-#include "QtDrawerCreator.hpp"
 
 class DrawSceneQtCommand : public BaseDrawCommand {
 public:
@@ -12,6 +11,7 @@ public:
     DrawSceneQtCommand(QGraphicsScene *sceneQt);
 
     virtual void execute();
+
 private:
-    QGraphicsScene *_sceneQt;
+    QGraphicsScene *__sceneQt;
 };

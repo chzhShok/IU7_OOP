@@ -5,8 +5,8 @@
 class BaseDirector {
 public:
     BaseDirector() = default;
-
     virtual ~BaseDirector() = 0;
 
-    virtual std::shared_ptr<BaseObject> create() = 0;
+    virtual void create() = 0;
+    virtual std::shared_ptr<BaseObject> get() = 0;
 };

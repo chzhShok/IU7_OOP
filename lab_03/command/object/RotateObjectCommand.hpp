@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "BaseObjectCommand.hpp"
 
 class RotateObjectCommand : public BaseObjectCommand {
@@ -11,8 +13,8 @@ public:
     virtual void execute();
 
 private:
-    size_t _id;
-    double _ox;
-    double _oy;
-    double _oz;
+    size_t __id;
+    double __ox;
+    double __oy;
+    double __oz;
 };

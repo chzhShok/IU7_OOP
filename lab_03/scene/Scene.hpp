@@ -3,8 +3,8 @@
 #include <list>
 
 #include "BaseObject.hpp"
-#include "SceneManager.hpp"
 #include "Visitor.hpp"
+#include "Composite.hpp"
 
 class Scene {
     friend class SceneManager;
@@ -24,7 +24,6 @@ public:
     void addObject(const std::shared_ptr<BaseObject> obj);
     void removeObject(const const_iterator &it);
     void addComposite(const std::vector<std::shared_ptr<BaseObject>> objects);
-
     void addCamera(const std::shared_ptr<BaseObject> obj);
     void removeCamera(const std::list<iterator>::const_iterator &it);
     std::shared_ptr<BaseObject> getCamera(const iteratorCamera &it);
@@ -46,7 +45,7 @@ public:
     iteratorCamera beginCamera();
     iteratorCamera endCamera();
 
-    void accept(std::shared_ptr<Visitor>);
+    void accept(Visitor &visitor);
     std::shared_ptr<Scene> clone();
 
 protected:

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "BaseCommand.hpp"
 #include "DrawManager.h"
 #include "LoadManager.hpp"
@@ -12,10 +14,11 @@ public:
     ~Facade() = default;
 
     void execute(BaseCommand &command);
+    std::shared_ptr<TransformManager> getTransformManager();
 
 private:
-    std::shared_ptr<SceneManager> _sceneManager;
-    std::shared_ptr<LoadManager> _loadManager;
-    std::shared_ptr<TransformManager> _transformManager;
-    std::shared_ptr<DrawManager> _drawManager;
+    std::shared_ptr<SceneManager> __sceneManager;
+    std::shared_ptr<LoadManager> __loadManager;
+    std::shared_ptr<TransformManager> __transformManager;
+    std::shared_ptr<DrawManager> __drawManager;
 };

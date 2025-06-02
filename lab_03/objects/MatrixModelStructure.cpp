@@ -1,62 +1,69 @@
-#include "MatrixModelStructure.hpp"
 #include <iostream>
 
-MatrixModelStructure::MatrixModelStructure() : _center(Vertex()), _vertices(std::vector<Vertex>()), _edgeMatrix(Matrix<int>()) {};
+#include "MatrixModelStructure.hpp"
 
-void MatrixModelStructure::transform(std::shared_ptr<TransformAction> action) {
-    for (Vertex &vertex: _vertices) {
-        action->transformPoint(vertex);
-    }
-    action->transformPoint(_center);
+MatrixModelStructure::MatrixModelStructure() : __center(Vertex()), __vertices(std::vector<Vertex>()), __edgeMatrix(Matrix<int>()) {};
+
+void MatrixModelStructure::transform(const TransformAction &action) {
+    for (Vertex &vertex: __vertices)
+        action.transformVertex(vertex);
+
+    action.transformVertex(__center);
 }
 
 std::vector<Vertex> MatrixModelStructure::getVertices() const {
-    return _vertices;
+    return __vertices;
 }
 
 std::vector<Edge> MatrixModelStructure::getEdges() const {
     std::vector<Edge> _edges;
 
-    for (size_t i = 0; i < _edgeMatrix.getSize(); ++i)
-        for (auto it = _edgeMatrix[i].begin() + i; it != _edgeMatrix[i].end(); ++it)
-            if (*it)
-                _edges.push_back(Edge(i, std::distance(_edgeMatrix[i].begin(), it)));
+    for (size_t i = 0; i < __edgeMatrix.size(); ++i)
+        for (size_t j = i; j < __edgeMatrix[i].size(); ++j)
+            if (__edgeMatrix[i][j])
+                _edges.push_back(Edge(i, j));
 
     return _edges;
 }
 
 Vertex MatrixModelStructure::getCenter() const {
-    Vertex copy(_center);
+    Vertex copy(__center);
     return copy;
 }
 
 void MatrixModelStructure::setCenter(const Vertex &center) {
-    _center = center;
+    __center = center;
 }
 
 void MatrixModelStructure::addVertex(const Vertex &vertex) {
-    _vertices.push_back(vertex);
-    _edgeMatrix.resize(_vertices.size(), false);
+    __vertices.push_back(vertex);
+
+    if (__edgeMatrix.size() == 0)
+        __edgeMatrix = Matrix<int>(__vertices.size());
+    else
+        __edgeMatrix.resize(__vertices.size(), 0);
 }
 
 void MatrixModelStructure::addEdge(const Edge &edge) {
-    if (edge.getFirst() >= _vertices.size() || edge.getSecond() >= _vertices.size()) {
+    if (edge.getFirst() >= __vertices.size() || edge.getSecond() >= __vertices.size()) {
         time_t now = time(nullptr);
         throw EdgeOutOfPointsException(ctime(&now), __FILE__, __LINE__, typeid(*this).name(), __FUNCTION__);
     }
 
-    *(_edgeMatrix[edge.getFirst()].begin() + edge.getSecond()) = true;
-    *(_edgeMatrix[edge.getSecond()].begin() + edge.getFirst()) = true;
+    __edgeMatrix[edge.getFirst()][edge.getSecond()] = true;
+    __edgeMatrix[edge.getSecond()][edge.getFirst()] = true;
 }
 
 std::shared_ptr<ModelStructure> MatrixModelStructure::clone() const {
     auto cloned = std::make_shared<MatrixModelStructure>();
-    cloned->setCenter(_center);
-    for (const Vertex &vertex: _vertices)
-        cloned->addVertex(vertex);
+    cloned->setCenter(__center);
+    cloned->__vertices = __vertices;
 
-    cloned->_edgeMatrix = _edgeMatrix;
-    std::cout << "Cloned" << std::endl;
+    cloned->__edgeMatrix = Matrix<int>(__vertices.size());
+
+    for (size_t i = 0; i < __edgeMatrix.size(); ++i)
+        for (size_t j = 0; j < __edgeMatrix[i].size(); ++j)
+            cloned->__edgeMatrix[i][j] = __edgeMatrix[i][j];
 
     return cloned;
 }

@@ -1,23 +1,19 @@
 #pragma once
 
 #include "CarcassModel.hpp"
-#include "CarcassModelLoader.hpp"
 #include "ModelStructure.hpp"
 
 class BaseCarcassModelBuilder {
 public:
-    BaseCarcassModelBuilder();
-    explicit BaseCarcassModelBuilder(std::shared_ptr<CarcassModelLoader> reader);
-    ~BaseCarcassModelBuilder();
+    BaseCarcassModelBuilder() = default;
+    virtual ~BaseCarcassModelBuilder() = 0;
 
-    virtual void buildVertices();
-    virtual void buildEdges();
-    virtual void buildCenter();
     virtual std::shared_ptr<CarcassModel> get();
+    virtual void buildVertex(const Vertex &vertex);
+    virtual void buildEdge(const Edge &edge);
+    virtual void buildCenter(const Vertex &center);
     virtual bool isBuilt();
 
 protected:
-    std::shared_ptr<CarcassModelLoader> _loader;
     std::shared_ptr<ModelStructure> _model;
-    bool _isBuilt;
 };

@@ -1,7 +1,7 @@
 #include "SetCameraCommand.hpp"
 
-SetCameraCommand::SetCameraCommand(std::size_t id) : _id(id) {}
+SetCameraCommand::SetCameraCommand(std::size_t id) : __id(id) {}
 
 void SetCameraCommand::execute() {
-    _sceneManager->setCamera(_id);
+    _sceneManager->setCamera(__id);
 }

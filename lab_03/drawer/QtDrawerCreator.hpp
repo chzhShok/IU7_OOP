@@ -1,7 +1,9 @@
 #pragma once
 
-#include "BaseDrawerCreator.hpp"
 #include <QGraphicsScene>
+
+#include "BaseDrawerCreator.hpp"
+#include "QtDrawer.hpp"
 
 class QtDrawerCreator : public BaseDrawerCreator {
 public:
@@ -12,5 +14,5 @@ public:
     std::shared_ptr<BaseDrawer> create();
 
 private:
-    QGraphicsScene *_scene;
+    QGraphicsScene *__scene;
 };

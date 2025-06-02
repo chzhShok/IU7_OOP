@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "BaseCameraCommand.hpp"
 
 class SetCameraCommand : public BaseCameraCommand {
@@ -9,6 +11,7 @@ public:
     virtual ~SetCameraCommand() = default;
 
     virtual void execute();
+
 private:
-    size_t _id;
+    size_t __id;
 };

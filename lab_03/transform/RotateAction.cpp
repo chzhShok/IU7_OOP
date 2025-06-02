@@ -1,0 +1,46 @@
+#include <cmath>
+#include <vector>
+
+#include "RotateAction.hpp"
+
+RotateAction::RotateAction(double ox, double oy, double oz) {
+    _matrix = Matrix<double>(4);
+    _matrix[0][0] = 1;
+    _matrix[1][1] = 1;
+    _matrix[2][2] = 1;
+    _matrix[3][3] = 1;
+
+    Matrix<double> z(4);
+    z[0][0] = cos(oz);
+    z[0][1] = sin(oz);
+    z[1][0] = -sin(oz);
+    z[1][1] = cos(oz);
+    z[2][2] = 1;
+    z[3][3] = 1;
+
+    Matrix<double> y(4);
+    y[0][0] = cos(oy);
+    y[0][2] = -sin(oy);
+    y[1][1] = 1;
+    y[2][0] = sin(oy);
+    y[2][2] = cos(oy);
+    y[3][3] = 1;
+
+    Matrix<double> x(4);
+    x[0][0] = 1;
+    x[1][1] = cos(ox);
+    x[1][2] = sin(ox);
+    x[2][1] = -sin(ox);
+    x[2][2] = cos(ox);
+    x[3][3] = 1;
+
+    _matrix = z * y * x;
+}
+
+RotateAction::RotateAction(const Vertex &center, double ox, double oy, double oz) {
+    MoveAction toCenter(Vertex(-center.getX(), -center.getY(), -center.getZ()));
+    RotateAction rotate(ox, oy, oz);
+    MoveAction fromCenter(center);
+
+    _matrix = fromCenter.getMatrix() * rotate.getMatrix() * toCenter.getMatrix();
+}

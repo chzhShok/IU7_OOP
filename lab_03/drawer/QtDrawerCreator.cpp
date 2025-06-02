@@ -1,9 +1,9 @@
-#include "QtDrawerCreator.hpp"
-#include "QtDrawer.hpp"
-#include <iostream>
+#include <memory>
 
-QtDrawerCreator::QtDrawerCreator(QGraphicsScene *scene) : _scene(scene) {}
+#include "QtDrawerCreator.hpp"
+
+QtDrawerCreator::QtDrawerCreator(QGraphicsScene *scene) : __scene(scene) {}
 
 std::shared_ptr<BaseDrawer> QtDrawerCreator::create() {
-    return std::make_shared<QtDrawer>(_scene);
+    return std::make_shared<QtDrawer>(__scene);
 }

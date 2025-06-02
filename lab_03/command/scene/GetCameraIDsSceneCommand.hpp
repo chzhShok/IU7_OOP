@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "BaseSceneCommand.hpp"
 
 class GetCameraIDsSceneCommand : public BaseSceneCommand {
@@ -8,7 +10,8 @@ public:
     virtual ~GetCameraIDsSceneCommand() = default;
 
     virtual void execute();
-    std::vector<std::size_t> getIDs();
+    std::vector<size_t> getIDs();
+
 private:
-    std::vector<std::size_t> _ids;
+    std::vector<size_t> __ids;
 };

@@ -1,21 +1,15 @@
 #pragma once
 
+#include <QDateTime>
 #include <QMainWindow>
 
 #include "Facade.hpp"
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-    class MainWindow;
-}
-QT_END_NAMESPACE
+#include "ui_mainwindow.h"
 
 class MyMainWindow : public QMainWindow {
-    Q_OBJECT
-
 public:
     MyMainWindow(QWidget *parent = 0);
-    ~MyMainWindow();
+    virtual ~MyMainWindow();
 
 private:
     void connectButtons();
@@ -23,14 +17,18 @@ private:
     Facade _facade;
 private slots:
     void on_loadButton_clicked();
-    void on_addCameraButton_clicked();
-    void on_setCameraButton_clicked();
-    void on_moveButton_clicked();
-    void on_rotateButton_clicked();
-    void on_scaleButton_clicked();
-    void on_deleteSelectedButton_clicked();
-    void on_objectsCompositeButton_clicked();
-
+    void on_cameraAddPushbutton_clicked();
+    void on_cameraDeletePushbutton_clicked();
+    void on_cameraMoveButton_clicked();
+    void on_cameraSetPushbutton_clicked();
+    void on_objectMovePushbutton_clicked();
+    void on_objectRotatePushbutton_clicked();
+    void on_objectScalePushbutton_clicked();
+    void on_objectDeletePushbutton_clicked();
+    void on_objectCompositePushbutton_clicked();
+    void on_undoButton_clicked();
+    void logError(const QString &message);
+    void logMessage(const QString &message);
 
 private:
     void drawScene();

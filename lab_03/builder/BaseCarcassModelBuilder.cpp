@@ -1,41 +1,23 @@
 #include "BaseCarcassModelBuilder.hpp"
 
-BaseCarcassModelBuilder::BaseCarcassModelBuilder() : _loader(nullptr), _isBuilt(false) {}
+BaseCarcassModelBuilder::~BaseCarcassModelBuilder() {}
 
-BaseCarcassModelBuilder::BaseCarcassModelBuilder(std::shared_ptr<CarcassModelLoader> reader) : _loader(reader), _isBuilt(false) {
-    _loader->open();
+void BaseCarcassModelBuilder::buildVertex(const Vertex &vertex) {
+    _model->addVertex(vertex);
 }
 
-BaseCarcassModelBuilder::~BaseCarcassModelBuilder() {
-    if (_loader && _loader->isOpen())
-        _loader->close();
+void BaseCarcassModelBuilder::buildEdge(const Edge &edge) {
+    _model->addEdge(edge);
 }
 
-void BaseCarcassModelBuilder::buildVertices() {
-    if (_loader) {
-        auto vertices = _loader->readVertices();
-
-        for (auto &vertex: vertices)
-            _model->addVertex(vertex);
-    }
-}
-
-void BaseCarcassModelBuilder::buildEdges() {
-    if (_loader) {
-        auto edges = _loader->readEdges();
-
-        for (auto &e: edges)
-            _model->addEdge(e);
-    }
-}
-
-void BaseCarcassModelBuilder::buildCenter() {
-    if (_loader)
-        _model->setCenter(_loader->readCenter());
+void BaseCarcassModelBuilder::buildCenter(const Vertex &center) {
+    _model->setCenter(center);
 }
 
 std::shared_ptr<CarcassModel> BaseCarcassModelBuilder::get() {
     return std::make_shared<CarcassModel>(_model);
 }
 
-bool BaseCarcassModelBuilder::isBuilt() { return _isBuilt; }
+bool BaseCarcassModelBuilder::isBuilt() {
+    return _model->getVertices().size() != 0;
+}

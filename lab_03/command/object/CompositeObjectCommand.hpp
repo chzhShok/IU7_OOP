@@ -1,3 +1,6 @@
+#include <cstddef>
+#include <vector>
+
 #include "BaseObjectCommand.hpp"
 
 class CompositeObjectCommand : public BaseObjectCommand {
@@ -9,5 +12,5 @@ public:
     virtual void execute();
 
 private:
-    std::vector<size_t> _ids;
+    std::vector<size_t> __ids;
 };

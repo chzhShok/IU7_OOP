@@ -1,6 +1,8 @@
 #pragma once
-#include "BaseDrawer.hpp"
+
 #include <memory>
+
+#include "BaseDrawer.hpp"
 
 class BaseDrawerCreator {
 public:

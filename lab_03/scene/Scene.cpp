@@ -1,7 +1,6 @@
-#include "Scene.hpp"
-#include "BaseObject.hpp"
-#include "Composite.hpp"
 #include <iostream>
+
+#include "Scene.hpp"
 
 Scene::Scene() : _objects(std::list<std::shared_ptr<BaseObject>>()), _cameras(std::list<iterator>()) {}
 
@@ -92,11 +91,11 @@ Scene::iteratorCamera Scene::endCamera() {
     return _cameras.cend();
 }
 
-void Scene::accept(std::shared_ptr<Visitor> v) {
-    for (const auto &obj: _objects) {
-        obj->accept(v);
-    }
+void Scene::accept(Visitor &visitor) {
+    for (const auto &obj: _objects)
+        obj->accept(visitor);
 }
+
 std::shared_ptr<Scene> Scene::clone() {
     std::shared_ptr<Scene> clone = std::make_shared<Scene>();
     auto cit = beginCamera();
@@ -108,12 +107,12 @@ std::shared_ptr<Scene> Scene::clone() {
             clone->addObject(obj->clone());
         }
     }
+
     return clone;
 }
 
 void Scene::addComposite(const std::vector<std::shared_ptr<BaseObject>> objects) {
     std::shared_ptr<Composite> composite = std::make_shared<Composite>();
-
     for (const auto &obj: objects)
         composite->add(obj);
 

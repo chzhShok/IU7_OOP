@@ -4,24 +4,24 @@
 #include <memory>
 
 #include "CarcassModelLoader.hpp"
+#include "CenterStrategy.hpp"
+#include "Exception.hpp"
 
 class TxtModelLoader : public CarcassModelLoader {
 public:
-    TxtModelLoader(std::string filename);
+    TxtModelLoader(const char *filename);
     virtual ~TxtModelLoader();
+
+    virtual void open();
+    virtual void close();
+    virtual bool isOpen();
 
     virtual std::vector<Vertex> readVertices();
     virtual std::vector<Edge> readEdges();
+    virtual Vertex readCenter();
 
 protected:
-//    std::string _fname;
-//    std::ifstream _file;
-
-private:
-    void resetFileStream();
-    int readVertexCount();
-    Vertex readSingleVertex();
-    int readEdgeCount();
-    Edge readSingleEdge();
-    void validateStreamState();
+    const char *_fname;
+    std::ifstream _file;
+    std::shared_ptr<BaseCenterStrategy> _centerStrategy;
 };

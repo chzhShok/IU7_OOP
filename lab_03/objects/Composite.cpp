@@ -18,9 +18,13 @@ std::shared_ptr<BaseObject> Composite::clone() const {
     return copy;
 }
 
-void Composite::accept(std::shared_ptr<Visitor> v) {
-    for (auto &elem: _objects)
-        elem->accept(v);
+void Composite::transform(const TransformAction &action) {
+    for (auto &obj: _objects)
+        obj->transform(action);
+}
+
+void Composite::accept(const Visitor &visitor) {
+    visitor.visit(*this);
 }
 
 Composite::iterator Composite::begin() {
@@ -44,5 +48,6 @@ Vertex Composite::getCenter() const {
     for (auto &obj: _objects)
         centers.push_back(obj->getCenter());
 
-    return Vertex::findCenter(centers);
+    CenterStrategy centerStrategy;
+    return centerStrategy.CenterAlgorithm(centers);
 }

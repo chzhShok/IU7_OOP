@@ -1,15 +1,16 @@
 #pragma once
 
+#include <memory>
+
 #include "BaseModel.hpp"
 #include "DrawVisitor.hpp"
 #include "ModelStructure.hpp"
 #include "TransformAction.hpp"
-#include "TransformVisitor.hpp"
-#include <memory>
+
+class Visitor;
 
 class CarcassModel : public BaseModel {
     friend class DrawVisitor;
-    friend class TransformVisitor;
 
 public:
     CarcassModel();
@@ -17,7 +18,8 @@ public:
     explicit CarcassModel(const CarcassModel &other);
     ~CarcassModel() = default;
 
-    virtual void accept(std::shared_ptr<Visitor> v);
+    virtual void accept(const Visitor &visitor);
+    virtual void transform(const TransformAction &action);
     virtual Vertex getCenter() const;
 
 protected:

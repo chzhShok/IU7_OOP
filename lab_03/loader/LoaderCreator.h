@@ -1,21 +1,23 @@
 #pragma once
 
+#include <memory>
+
 #include "BaseLoaderCreator.hpp"
 #include "CarcassModelLoader.hpp"
 #include "Concept.hpp"
-#include "CsvModelLoader.hpp"
+#include "JsonModelLoader.hpp"
 #include "TxtModelLoader.hpp"
 
-#include <memory>
-
-template<Loadable LoaderBase, Loadable LoaderProd, typename... Args>
+template<typename LoaderBase, typename LoaderProd, typename... Args>
+    requires NotAbstract<LoaderProd> && Derivative<LoaderProd, LoaderBase> && Constructible<LoaderProd, Args...>
 class LoaderCreator : public BaseLoaderCreatorTemplate<LoaderBase, Args...> {
 public:
     virtual ~LoaderCreator() = default;
+
     virtual std::shared_ptr<LoaderBase> create(Args &&...args);
 };
 
-using TxtModelLoaderCreator = LoaderCreator<CarcassModelLoader, TxtModelLoader, std::string>;
-using CsvModelLoaderCreator = LoaderCreator<CarcassModelLoader, CsvModelLoader, std::string>;
+using TxtCarcassModelLoaderCreator = LoaderCreator<CarcassModelLoader, TxtModelLoader, const char *>;
+using SqlCarcassModelLoaderCreator = LoaderCreator<CarcassModelLoader, JsonModelLoader, const char *>;
 
 #include "LoaderCreator.hpp"
