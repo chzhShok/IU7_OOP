@@ -19,7 +19,6 @@ private slots:
     void on_loadButton_clicked();
     void on_cameraAddPushbutton_clicked();
     void on_cameraDeletePushbutton_clicked();
-    void on_cameraMoveButton_clicked();
     void on_cameraSetPushbutton_clicked();
     void on_objectMovePushbutton_clicked();
     void on_objectRotatePushbutton_clicked();
@@ -27,6 +26,7 @@ private slots:
     void on_objectDeletePushbutton_clicked();
     void on_objectCompositePushbutton_clicked();
     void on_undoButton_clicked();
+    void on_swapEdgesVisibilityButton_clicked();
     void logError(const QString &message);
     void logMessage(const QString &message);
 

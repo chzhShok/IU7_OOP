@@ -13,8 +13,10 @@ public:
     virtual void transform(const TransformAction &action);
     virtual std::vector<Vertex> getVertices() const;
     virtual std::vector<Edge> getEdges() const;
+    virtual std::vector<Face> getFaces() const;
     virtual void addVertex(const Vertex &vertex);
     virtual void addEdge(const Edge &edge);
+    virtual void addFace(const Face& face);
     virtual Vertex getCenter() const;
     virtual void setCenter(const Vertex &center);
     virtual std::shared_ptr<ModelStructure> clone() const;
@@ -23,4 +25,5 @@ private:
     Vertex __center;
     std::vector<Vertex> __vertices;
     Matrix<int> __edgeMatrix;
+    std::vector<Face> _faces;
 };

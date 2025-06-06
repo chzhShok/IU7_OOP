@@ -17,7 +17,7 @@ public:
     LoadManager();
     ~LoadManager() = default;
 
-    std::shared_ptr<BaseObject> loadBoneModelFile(std::size_t directorID, std::size_t loaderID, const char *filename);
+    std::shared_ptr<BaseObject> loadCarcassModelFile(std::size_t directorID, std::size_t loaderID, const char *filename);
 
 protected:
     DirectorSolution _dsolution;

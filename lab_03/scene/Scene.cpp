@@ -16,8 +16,7 @@ void Scene::addCamera(const std::shared_ptr<BaseObject> obj) {
     _objects.push_back(obj);
     auto it = _objects.begin();
     auto itnext = ++_objects.begin();
-    for (; itnext != _objects.end(); ++it, ++itnext)
-        ;
+    for (; itnext != _objects.end(); ++it, ++itnext);
 
     _cameras.push_back(it);
 }

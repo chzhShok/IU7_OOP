@@ -1,4 +1,5 @@
 #include "Camera.hpp"
+#include "Visitor.hpp"
 
 Camera::Camera() : _self(Vertex(0, 0, -500)), _normalForward(Vertex(0, 0, 1)), _normalUp(Vertex(0, 1, 0)), _normalRight(Vertex(1, 0, 0)) {}
 
@@ -26,4 +27,8 @@ bool Camera::isComposite() const {
 Vertex Camera::getCenter() const {
     Vertex copy(_self);
     return copy;
+}
+
+std::shared_ptr<BaseObject> Camera::clone() const {
+    return std::make_shared<Camera>(*this);
 }

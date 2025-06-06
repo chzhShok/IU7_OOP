@@ -24,7 +24,8 @@ void Composite::transform(const TransformAction &action) {
 }
 
 void Composite::accept(const Visitor &visitor) {
-    visitor.visit(*this);
+    for (auto &obj: _objects)
+        obj->accept(visitor);
 }
 
 Composite::iterator Composite::begin() {

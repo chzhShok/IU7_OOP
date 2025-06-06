@@ -40,45 +40,25 @@ std::shared_ptr<BaseObject> SceneManager::getObject(std::size_t id) {
 }
 
 void SceneManager::removeObject(std::size_t id) {
-    auto itCameras = std::ranges::find_if(_scene->_cameras, [id](const auto &camIt) {
-        return (*camIt)->getId() == id;
-    });
-
-    if (itCameras != _scene->endCamera())
-        _scene->removeCamera(itCameras);
-
-    auto itObjects = std::ranges::find_if(*_scene, [id](const auto &obj) {
-        return obj->getId() == id;
-    });
-
-    if (itObjects != _scene->end())
-        _scene->removeObject(itObjects);
+    for (auto it = _scene->cbegin(); it != _scene->cend(); ++it)
+        if ((*it)->getId() == id) {
+            _scene->removeObject(it);
+            return;
+        }
 }
 
 std::vector<std::shared_ptr<BaseObject>> SceneManager::getCameras() {
     std::vector<std::shared_ptr<BaseObject>> cameras;
-    //    for (auto it = _scene->beginCamera(); it != _scene->endCamera(); ++it)
-    //        cameras.push_back(**it);
-    for (auto &it: _scene->_cameras)
-        cameras.push_back(*it);
+    for (auto it = _scene->beginCamera(); it != _scene->endCamera(); ++it)
+        cameras.push_back(**it);
 
     return cameras;
 }
 
 std::shared_ptr<Camera> SceneManager::getCamera(std::size_t id) {
-    //    for (auto it = _scene->beginCamera(); it != _scene->endCamera(); ++it) {
-    //        if ((**it)->getId() == id) {
-    //            auto obj = std::dynamic_pointer_cast<Camera>(**it);
-    //            if (obj == nullptr)
-    //                throw std::runtime_error("Object is not a camera");
-    //
-    //            return obj;
-    //        }
-    //    }
-
-    for (auto &it: _scene->_cameras) {
-        if ((*it)->getId() == id) {
-            auto obj = std::dynamic_pointer_cast<Camera>(*it);
+    for (auto it = _scene->beginCamera(); it != _scene->endCamera(); ++it) {
+        if ((**it)->getId() == id) {
+            auto obj = std::dynamic_pointer_cast<Camera>(**it);
             if (obj == nullptr)
                 throw std::runtime_error("Object is not a camera");
 
@@ -88,15 +68,13 @@ std::shared_ptr<Camera> SceneManager::getCamera(std::size_t id) {
 
     return nullptr;
 }
-void SceneManager::removeCamera(std::size_t id) {
-    auto camera_it = std::ranges::find_if(_scene->_cameras, [id](const auto &cam) {
-        return (*cam)->getId() == id;
-    });
 
-    if (camera_it != _scene->endCamera()) {
-        _scene->removeCamera(camera_it);
-        return;
-    }
+void SceneManager::removeCamera(std::size_t id) {
+    for (auto it = _scene->beginCamera(); it != _scene->endCamera(); ++it)
+        if ((**it)->getId() == id) {
+            _scene->removeCamera(it);
+            return;
+        }
 }
 
 void SceneManager::setCamera(std::size_t id) {
@@ -122,19 +100,28 @@ std::vector<std::size_t> SceneManager::getObjectIds() {
 
 std::vector<std::size_t> SceneManager::getCameraIds() {
     std::vector<std::size_t> ids;
-    for (auto &it: _scene->_cameras)
-        ids.push_back((*it)->getId());
+    for (auto it = _scene->beginCamera(); it != _scene->endCamera(); ++it)
+        if (**it)
+            ids.push_back((**it)->getId());
 
     return ids;
 }
 
-void SceneManager::makeComposite(const std::vector<size_t> &ids) {
-    std::vector<std::shared_ptr<BaseObject>> objects;
-    objects.reserve(ids.size());
+//void SceneManager::makeComposite(const std::vector<size_t> ids) {
+//    std::vector<std::shared_ptr<BaseObject>> objects;
+//    objects.reserve(ids.size());
+//
+//    for (const auto id: ids)
+//        if (auto obj = getObject(id))
+//            objects.push_back(obj);
+//
+//    _scene->addComposite(objects);
+//}
 
-    for (const auto id: ids)
-        if (auto obj = getObject(id))
-            objects.push_back(obj);
+void SceneManager::makeComposite(std::vector<size_t> ids) {
+    std::vector<std::shared_ptr<BaseObject>> objects;
+    for (auto it = ids.begin(); it != ids.end(); ++it)
+        objects.push_back(getObject(*it));
 
     _scene->addComposite(objects);
 }

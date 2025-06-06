@@ -23,7 +23,7 @@ public:
     std::shared_ptr<BaseObject> getObject(std::size_t id);
     std::vector<std::size_t> getObjectIds();
     void removeObject(std::size_t id);
-    void makeComposite(const std::vector<size_t>& ids);
+    void makeComposite(std::vector<size_t> ids);
 
     void addCamera(const Vertex &pos);
     std::vector<std::shared_ptr<BaseObject>> getCameras();

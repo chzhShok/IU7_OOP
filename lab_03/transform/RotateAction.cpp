@@ -44,3 +44,12 @@ RotateAction::RotateAction(const Vertex &center, double ox, double oy, double oz
 
     _matrix = fromCenter.getMatrix() * rotate.getMatrix() * toCenter.getMatrix();
 }
+
+//RotateAction::RotateAction(const Vertex & center, double ox, double oy, double oz) {
+//    MoveAction toCenter(Vertex(-center.getX(), -center.getY(), -center.getZ()));
+//    _matrix *= toCenter.getMatrix();
+//    RotateAction rotate(ox, oy, oz);
+//    _matrix *= rotate.getMatrix();
+//    MoveAction fromCenter(center);
+//    _matrix *= fromCenter.getMatrix();
+//}

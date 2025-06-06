@@ -8,6 +8,7 @@
 #include "ScaleAction.hpp"
 #include "TransformAction.hpp"
 #include "TransformCaretaker.hpp"
+#include "CarcassModel.hpp"
 
 class TransformManager {
 public:

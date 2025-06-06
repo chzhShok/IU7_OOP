@@ -26,6 +26,10 @@ std::vector<Edge> MatrixModelStructure::getEdges() const {
     return _edges;
 }
 
+std::vector<Face> MatrixModelStructure::getFaces() const {
+    return _faces;
+}
+
 Vertex MatrixModelStructure::getCenter() const {
     Vertex copy(__center);
     return copy;
@@ -54,6 +58,10 @@ void MatrixModelStructure::addEdge(const Edge &edge) {
     __edgeMatrix[edge.getSecond()][edge.getFirst()] = true;
 }
 
+void MatrixModelStructure::addFace(const Face &face) {
+    _faces.push_back(face);
+}
+
 std::shared_ptr<ModelStructure> MatrixModelStructure::clone() const {
     auto cloned = std::make_shared<MatrixModelStructure>();
     cloned->setCenter(__center);
@@ -64,6 +72,9 @@ std::shared_ptr<ModelStructure> MatrixModelStructure::clone() const {
     for (size_t i = 0; i < __edgeMatrix.size(); ++i)
         for (size_t j = 0; j < __edgeMatrix[i].size(); ++j)
             cloned->__edgeMatrix[i][j] = __edgeMatrix[i][j];
+
+    for (const Face& face : _faces)
+        cloned->addFace(face);
 
     return cloned;
 }

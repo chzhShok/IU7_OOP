@@ -154,6 +154,12 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="xCameraSpin">
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>0.000000000000000</double>
              </property>
@@ -172,6 +178,12 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="yCameraSpin">
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>0.000000000000000</double>
              </property>
@@ -190,6 +202,12 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="zCameraSpin">
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>0.000000000000000</double>
              </property>
@@ -216,27 +234,16 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="setCameraButton">
-               <property name="text">
-                <string>Установить</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QVBoxLayout" name="firstCamerasLayout">
-             <item>
-              <widget class="QPushButton" name="moveCameraButton">
-               <property name="text">
-                <string>Переместить</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QPushButton" name="addCameraButton">
                <property name="text">
                 <string>Добавить</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="setCameraButton">
+               <property name="text">
+                <string>Установить</string>
                </property>
               </widget>
              </item>
@@ -264,6 +271,13 @@
          </item>
          <item>
           <layout class="QVBoxLayout" name="objectsActionsLayout">
+           <item>
+            <widget class="QPushButton" name="swapEdgesVisibilityButton">
+             <property name="text">
+              <string>Переключить видимость ребер</string>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QPushButton" name="deleteSelectedButton">
              <property name="text">
@@ -302,6 +316,15 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="xMoveSpin">
+             <property name="decimals">
+              <number>2</number>
+             </property>
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>10.000000000000000</double>
              </property>
@@ -316,6 +339,12 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="yMoveSpin">
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>10.000000000000000</double>
              </property>
@@ -330,6 +359,12 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="zMoveSpin">
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>10.000000000000000</double>
              </property>
@@ -355,6 +390,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="xRotateSpin">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>10.000000000000000</double>
              </property>
@@ -369,6 +407,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="yRotateSpin">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>10.000000000000000</double>
              </property>
@@ -383,6 +424,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="zRotateSpin">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>10.000000000000000</double>
              </property>
@@ -408,6 +452,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="xScaleSpin">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>2.000000000000000</double>
              </property>
@@ -422,6 +469,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="yScaleSpin">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>2.000000000000000</double>
              </property>
@@ -436,6 +486,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="zScaleSpin">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
              <property name="value">
               <double>2.000000000000000</double>
              </property>

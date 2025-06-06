@@ -15,18 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
 
-# Поиск SQLite
-find_package(SQLite3 REQUIRED)
 find_package(nlohmann_json 3.11.2 REQUIRED)
-#include(FetchContent)
-#
-#FetchContent_Declare(
-#        nlohmann_json
-#        GIT_REPOSITORY https://github.com/nlohmann/json.git
-#        GIT_TAG v3.11.2  # или другая версия
-#)
-#
-#FetchContent_MakeAvailable(nlohmann_json)
 
 # Включение всех заголовочных файлов через один вызов
 include_directories(
@@ -64,8 +53,6 @@ set(PROJECT_SOURCES
         command/camera/AddCameraCommand.hpp
         command/camera/BaseCameraCommand.cpp
         command/camera/BaseCameraCommand.hpp
-        command/camera/MoveCameraCommand.cpp
-        command/camera/MoveCameraCommand.hpp
         command/camera/RemoveCameraCommand.cpp
         command/camera/RemoveCameraCommand.hpp
         command/camera/SetCameraCommand.cpp
@@ -199,6 +186,12 @@ set(PROJECT_SOURCES
         mainwindow.hpp
         strategy/BaseCenterStrategy.hpp
         strategy/BaseCenterStrategy.cpp
+        manager/DrawManager.cpp
+        command/draw/SwapEdgesVisibility.cpp
+        objects/FaceBuilder.cpp
+        objects/Vector3.cpp
+        command/camera/MoveCameraCommand.cpp
+        command/camera/MoveCameraCommand.hpp
 )
 
 # Альтернативно можно использовать явное перечисление, как у вас было,
@@ -219,7 +212,6 @@ endif ()
 target_link_libraries(lab_03 PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Sql
-        ${SQLite3_LIBRARIES}
         nlohmann_json::nlohmann_json
 )
 

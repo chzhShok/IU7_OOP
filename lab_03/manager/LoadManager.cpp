@@ -11,7 +11,7 @@ LoadManager::LoadManager() {
     _lsolution.registerCreator(JSONMODELLOADERCREATOR_ID, std::make_shared<SqlCarcassModelLoaderCreator>());
 }
 
-std::shared_ptr<BaseObject> LoadManager::loadBoneModelFile(std::size_t directorID, std::size_t loaderID, const char *filename) {
+std::shared_ptr<BaseObject> LoadManager::loadCarcassModelFile(std::size_t directorID, std::size_t loaderID, const char *filename) {
     std::shared_ptr<BaseDirectorCreator> absDirectorCreator = _dsolution.create(directorID);
     std::shared_ptr<BaseLoaderCreator> absLoaderCreator = _lsolution.create(loaderID);
 

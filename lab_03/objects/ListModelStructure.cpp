@@ -17,6 +17,10 @@ std::vector<Edge> ListModelStructure::getEdges() const {
     return _edges;
 }
 
+std::vector<Face> ListModelStructure::getFaces() const {
+    return _faces;
+}
+
 Vertex ListModelStructure::getCenter() const {
     Vertex copy(_center);
     return copy;
@@ -34,6 +38,10 @@ void ListModelStructure::addEdge(const Edge &edge) {
     _edges.push_back(edge);
 }
 
+void ListModelStructure::addFace(const Face& face) {
+    _faces.push_back(face);
+}
+
 std::shared_ptr<ModelStructure> ListModelStructure::clone() const {
     auto cloned = std::make_shared<ListModelStructure>();
     cloned->setCenter(_center);
@@ -43,6 +51,9 @@ std::shared_ptr<ModelStructure> ListModelStructure::clone() const {
 
     for (const Edge &edge: _edges)
         cloned->addEdge(edge);
+
+    for (const Face& face : _faces)
+        cloned->addFace(face);
 
     return cloned;
 }

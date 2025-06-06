@@ -13,13 +13,13 @@
 #include "JsonLoadCommandDecorator.hpp"
 #include "ListLoadCommand.hpp"
 #include "MatrixLoadCommand.hpp"
-#include "MoveCameraCommand.hpp"
 #include "MoveObjectCommand.hpp"
 #include "RemoveCameraCommand.hpp"
 #include "RemoveObjectCommand.hpp"
 #include "RotateObjectCommand.hpp"
 #include "ScaleObjectCommand.hpp"
 #include "SetCameraCommand.hpp"
+#include "SwapEdgesVisibility.hpp"
 #include "TxtLoadCommandDecorator.hpp"
 #include "Vertex.hpp"
 
@@ -54,13 +54,13 @@ void MyMainWindow::connectButtons() {
     connect(ui->addCameraButton, &QPushButton::clicked, this, &MyMainWindow::on_cameraAddPushbutton_clicked);
     connect(ui->deleteCameraButton, &QPushButton::clicked, this, &MyMainWindow::on_cameraDeletePushbutton_clicked);
     connect(ui->setCameraButton, &QPushButton::clicked, this, &MyMainWindow::on_cameraSetPushbutton_clicked);
-    connect(ui->moveCameraButton, &QPushButton::clicked, this, &MyMainWindow::on_cameraMoveButton_clicked);
     connect(ui->moveButton, &QPushButton::clicked, this, &MyMainWindow::on_objectMovePushbutton_clicked);
     connect(ui->rotateButton, &QPushButton::clicked, this, &MyMainWindow::on_objectRotatePushbutton_clicked);
     connect(ui->scaleButton, &QPushButton::clicked, this, &MyMainWindow::on_objectScalePushbutton_clicked);
     connect(ui->deleteSelectedButton, &QPushButton::clicked, this, &MyMainWindow::on_objectDeletePushbutton_clicked);
     connect(ui->compositeButton, &QPushButton::clicked, this, &MyMainWindow::on_objectCompositePushbutton_clicked);
     connect(ui->stepBackButton, &QPushButton::clicked, this, &MyMainWindow::on_undoButton_clicked);
+    connect(ui->swapEdgesVisibilityButton, &QPushButton::clicked, this, &MyMainWindow::on_swapEdgesVisibilityButton_clicked);
 }
 
 void MyMainWindow::on_loadButton_clicked() {
@@ -159,30 +159,6 @@ void MyMainWindow::on_cameraSetPushbutton_clicked() {
     }
 }
 
-void MyMainWindow::on_cameraMoveButton_clicked() {
-    double x = ui->xCameraSpin->value();
-    double y = ui->yCameraSpin->value();
-    double z = ui->zCameraSpin->value();
-
-    auto cams = getSelectedCameraIds();
-    if (cams.empty()) {
-        logError("Не выбраны камеры для перемещения");
-        return;
-    }
-
-    for (size_t id: cams) {
-        try {
-            MoveCameraCommand command(id, x, y, z);
-            _facade.execute(command);
-            logMessage(QString("Перемещена камера [ID: %1] на [ΔX: %2, ΔY: %3, ΔZ: %4]").arg(id).arg(x).arg(y).arg(z));
-        } catch (Exception &exc) {
-            logError(exc.what());
-        }
-    }
-
-    drawScene();
-}
-
 void MyMainWindow::updateCameraList() {
     ui->camerasList->clear();
     GetCameraIDsSceneCommand ids;
@@ -277,7 +253,6 @@ void MyMainWindow::on_objectRotatePushbutton_clicked() {
     drawScene();
 }
 
-
 void MyMainWindow::on_objectScalePushbutton_clicked() {
     auto objs = getSelectedObjectIds();
     if (objs.empty()) {
@@ -356,6 +331,13 @@ void MyMainWindow::on_undoButton_clicked() {
     } catch (Exception &exc) {
         logError(exc.what());
     }
+
+    drawScene();
+}
+
+void MyMainWindow::on_swapEdgesVisibilityButton_clicked() {
+    SwapEdgesVisibility swapEdgesVisibility;
+    _facade.execute(swapEdgesVisibility);
 
     drawScene();
 }

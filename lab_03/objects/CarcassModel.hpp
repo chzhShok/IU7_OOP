@@ -11,6 +11,7 @@ class Visitor;
 
 class CarcassModel : public BaseModel {
     friend class DrawVisitor;
+    friend class TransformManager;
 
 public:
     CarcassModel();

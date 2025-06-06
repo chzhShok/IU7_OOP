@@ -6,7 +6,8 @@ void DrawManager::drawScene(std::shared_ptr<Scene> scene, std::shared_ptr<Camera
     DrawerCreator drawerCreator(args...);
     std::shared_ptr<BaseDrawer> drawer = drawerCreator.create();
     DrawVisitor visitor(drawer, camera);
+    setEdgesVisibilityForVisitor(visitor);
 
-    for (auto &item: *scene)
-        item->accept(visitor);
+    for (auto it = scene->begin(); it != scene->end(); ++it)
+        (*it)->accept(visitor);
 }
