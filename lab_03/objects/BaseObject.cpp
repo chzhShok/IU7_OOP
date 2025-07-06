@@ -44,7 +44,6 @@ std::size_t BaseObject::getId() const {
 
 void BaseObject::transform(const TransformAction &action) {
     _transformMatrix = _transformMatrix * action.getMatrix();
-    //    _transformMatrix = action.getMatrix() * _transformMatrix;// Возможно, нужно поменять порядок
 }
 
 Matrix<double> BaseObject::getTransformMatrix() const {

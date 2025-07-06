@@ -107,17 +107,6 @@ std::vector<std::size_t> SceneManager::getCameraIds() {
     return ids;
 }
 
-//void SceneManager::makeComposite(const std::vector<size_t> ids) {
-//    std::vector<std::shared_ptr<BaseObject>> objects;
-//    objects.reserve(ids.size());
-//
-//    for (const auto id: ids)
-//        if (auto obj = getObject(id))
-//            objects.push_back(obj);
-//
-//    _scene->addComposite(objects);
-//}
-
 void SceneManager::makeComposite(std::vector<size_t> ids) {
     std::vector<std::shared_ptr<BaseObject>> objects;
     for (auto it = ids.begin(); it != ids.end(); ++it)

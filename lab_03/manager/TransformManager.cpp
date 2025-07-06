@@ -10,8 +10,7 @@ void TransformManager::rotateObject(std::shared_ptr<BaseObject> object, double o
         __caretaker.save(std::make_shared<TransformMemento>(
                 object,
                 object->getTransformMatrix(),
-                carcass->_model->clone()// Используем clone() вместо конструктора копирования
-                ));
+                carcass->_model->clone()));
     } else {
         __caretaker.save(std::make_shared<TransformMemento>(object, object->getTransformMatrix()));
     }
@@ -66,7 +65,8 @@ void TransformManager::transformObject(std::shared_ptr<BaseObject> object, const
 
 bool TransformManager::undo() {
     auto memento = __caretaker.undo();
-    if (!memento) return false;
+    if (!memento)
+        return false;
 
     auto obj = memento->getObject();
     if (obj) {

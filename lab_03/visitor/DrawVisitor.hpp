@@ -1,36 +1,3 @@
-//#pragma once
-//
-//#include "BaseDrawer.hpp"
-//#include "CarcassModel.hpp"
-//#include "Composite.hpp"
-//#include "Vertex.hpp"
-//#include "Visitor.hpp"
-//#include "Vector3.hpp"
-//
-//
-//class Camera;
-//class CameraProjectionAction;
-//
-//class DrawVisitor : public Visitor {
-//public:
-//    DrawVisitor() = delete;
-//    DrawVisitor(std::shared_ptr<BaseDrawer> drawer, std::shared_ptr<Camera> camera);
-//    ~DrawVisitor() = default;
-//
-//    virtual void visit(CarcassModel &model) const;
-//    virtual void visit(Camera &camera) const;
-//    virtual void visit(Composite &composite) const;
-//
-//    void setFaceCullingEnabled(bool enabled) { _faceCullingEnabled = enabled; }
-//    bool isFaceCullingEnabled() const { return _faceCullingEnabled; }
-//
-//private:
-//    Vertex getCameraProjection(const Vertex &point) const;
-//    std::shared_ptr<BaseDrawer> __drawer;
-//    std::shared_ptr<Camera> __camera;
-//    bool _faceCullingEnabled = true;
-//};
-
 #pragma once
 
 #include "BaseDrawer.hpp"
